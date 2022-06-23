@@ -27,10 +27,8 @@ RUN pip install git+https://github.com/Pycord-Development/pycord \
     pip install oauth2client \
     pip install neologdn
 RUN /usr/local/bin/python -m pip install --upgrade pip
-COPY discordbot_bf.py discordbot_bf.py
-COPY makesomenoise-4243a19364b1.json makesomenoise-4243a19364b1.json
-COPY tournament.png tournament.png
+COPY discordbot_image.py discordbot_image.py
 COPY eng.traineddata eng.traineddata
 COPY jpn.traineddata jpn.traineddata
-CMD ["python", "-u", "discordbot_bf.py"]
+CMD ["python", "-u", "discordbot_image.py"]
 ARG EnvironmentVariable
