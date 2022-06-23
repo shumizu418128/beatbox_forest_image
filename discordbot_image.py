@@ -4,14 +4,24 @@ from decimal import Decimal
 
 import cv2
 import discord
+import gspread
 import numpy as np
 import pyocr
 import pyocr.builders
 from discord import Embed
 from discord.ui import Button, View
+from oauth2client.service_account import ServiceAccountCredentials
 from PIL import Image
 from scipy.spatial import distance
 
+scope = ['https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive']
+credentials = ServiceAccountCredentials.from_json_keyfile_name(
+    'makesomenoise-4243a19364b1.json', scope)
+gc = gspread.authorize(credentials)
+SPREADSHEET_KEY = '1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4'
+workbook = gc.open_by_key(SPREADSHEET_KEY)
+worksheet = workbook.worksheet('botデータベース（さわらないでね）')
 intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
 intents.typing = False  # typingを受け取らないように
 client = discord.Bot(intents=intents)
@@ -20,6 +30,58 @@ print('ビト森杯bot - 画像分析: 起動完了')
 
 @client.event
 async def on_message(message):
+    if message.content == "s.mt":
+        await message.channel.send("メンテナンス中...")
+        error = []
+        roleA = message.guild.get_role(920320926887862323)  # A部門 ビト森杯
+        roleB = message.guild.get_role(920321241976541204)  # B部門 ビト森杯
+        memberA = set(roleA.members)
+        memberB = set(roleB.members)
+        mid_A = [member.id for member in roleA.members]
+        mid_B = [member.id for member in roleB.members]
+        try:
+            DBidA_str = worksheet.col_values(3)
+            DBidB_str = worksheet.col_values(7)
+        except gspread.exceptions.APIError as e:
+            await message.channel.send(f"Error: {e}")
+            return
+        DBidA_str.remove("id")
+        DBidB_str.remove("id")
+        DBidA = [int(id) for id in DBidA_str]
+        DBidB = [int(id) for id in DBidB_str]
+        # メンテその1 重複ロール付与
+        for member in memberA & memberB:
+            error.append(f"・重複ロール付与\n{member.display_name}\nID: {member.id}")
+        # メンテその2 ロール未付与
+        for id in set(DBidA) - set(mid_A):
+            member = message.guild.get_member(id)
+            error.append(
+                f"・🇦部門 ロール未付与\n{member.display_name}\nID: {member.id}")
+        for id in set(DBidB) - set(mid_B):
+            member = message.guild.get_member(id)
+            error.append(
+                f"・🅱️部門 ロール未付与\n{member.display_name}\nID: {member.id}")
+        # メンテその3 DB未登録
+        for id in set(mid_A) - set(DBidA):
+            member = message.guild.get_member(id)
+            error.append(f"・🇦部門 DB未登録\n{member.display_name}\nID: {member.id}")
+        for id in set(mid_B) - set(DBidB):
+            member = message.guild.get_member(id)
+            error.append(
+                f"・🅱️部門 DB未登録\n{member.display_name}\nID: {member.id}")
+        # メンテその4 DB AB重複
+        for id in set(DBidA) & set(DBidB):
+            member = message.guild.get_member(id)
+            error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
+        if error == []:
+            await message.channel.send("エラーなし")
+            return
+        await message.channel.send("<@412082841829113877>\n見つかったエラー：")
+        for e in error:
+            await message.channel.send(e)
+        await message.channel.send("---finish---")
+        return
+
     if len(message.attachments) != 2 and message.channel.id == 952946795573571654:  # 画像提出
         await message.delete(delay=1)
         if len(message.attachments) == 0:
