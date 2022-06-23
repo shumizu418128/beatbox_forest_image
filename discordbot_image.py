@@ -1,0 +1,249 @@
+from asyncio import sleep
+from datetime import datetime
+from decimal import Decimal
+
+import cv2
+import discord
+import numpy as np
+import pyocr
+import pyocr.builders
+from discord import Embed
+from discord.ui import Button, View
+from PIL import Image
+from scipy.spatial import distance
+
+intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
+intents.typing = False  # typingを受け取らないように
+client = discord.Bot(intents=intents)
+print('ビト森杯bot - 画像分析: 起動完了')
+
+
+@client.event
+async def on_message(message):
+    if len(message.attachments) != 2 and message.channel.id == 952946795573571654:  # 画像提出
+        await message.delete(delay=1)
+        if len(message.attachments) == 0:
+            contact = client.get_channel(920620259810086922)  # お問い合わせ
+            await message.channel.send(f"お問い合わせは {contact.mention} までお願いします。", delete_after=5)
+            return
+        await message.channel.send(f"{message.author.mention}\nError: 画像を2枚同時に投稿してください。", delete_after=5)
+        if len(message.attachments) == 1:
+            await message.channel.send("画像1枚では、すべての設定項目が画像内に収まりません。", delete_after=5)
+        return
+
+    if len(message.attachments) == 2 and message.author.bot:
+        return
+
+    # 画像提出
+    if len(message.attachments) == 2 and message.channel.id == 952946795573571654:
+        # 初期設定
+        overwrite = discord.PermissionOverwrite()
+        overwrite.send_messages = False
+        overwrite.view_channel = True
+        roleA = message.guild.get_role(920320926887862323)  # A部門 ビト森杯
+        roleB = message.guild.get_role(920321241976541204)  # B部門 ビト森杯
+        await message.channel.set_permissions(roleA, overwrite=overwrite)
+        await message.channel.set_permissions(roleB, overwrite=overwrite)
+        overwrite.send_messages = True
+        contact = client.get_channel(920620259810086922)  # お問い合わせ
+        bot_channel = client.get_channel(897784178958008322)  # bot用チャット
+        admin = message.guild.get_role(904368977092964352)  # ビト森杯運営
+        verified = message.guild.get_role(952951691047747655)  # verified
+        await message.delete()
+        close_notice = await message.channel.send(f"一時的に提出受付をストップしています。しばらくお待ちください。\n\n※長時間続いている場合は、お手数ですが {contact.mention} までご連絡ください。")
+        try:
+            channel = await message.channel.create_thread(name=f"{message.author.display_name} 分析ログ")
+        except AttributeError:
+            await message.channel.set_permissions(roleA, overwrite=overwrite)
+            await message.channel.set_permissions(roleB, overwrite=overwrite)
+            await close_notice.delete()
+            await message.channel.send("Error: ここに画像を送信しないでください。")
+            await message.delete()
+            return
+        await channel.send(f"{message.author.mention}\nご提出ありがとうございます。\n分析を行います。しばらくお待ちください。", delete_after=20)
+        embed = Embed(title="分析中...", description="0% 完了")
+        status = await channel.send(embed=embed)
+        tools = pyocr.get_available_tools()
+        tool = tools[0]
+        langs = tool.get_available_languages()
+        lang = langs[1]
+        file_names = []
+        error_msg = []
+        error_code = 0
+        for a in message.attachments:
+            if a.content_type == "image/jpeg" or a.content_type == "image/png":
+                if Decimal(f"{a.height}") / Decimal(f"{a.width}") < Decimal("1.6"):
+                    button = Button(
+                        label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
+
+                    async def button_callback(interaction):
+                        admin = interaction.user.get_role(
+                            904368977092964352)  # ビト森杯運営
+                        if bool(admin):
+                            await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
+                            await message.author.add_roles(verified)
+                            await interaction.response.send_message(f"✅{message.author.display_name}にverifiedロールを付与しました。")
+                    button.callback = button_callback
+                    view = View(timeout=None)
+                    view.add_item(button)
+                    await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
+                    await message.channel.set_permissions(roleA, overwrite=overwrite)
+                    await message.channel.set_permissions(roleB, overwrite=overwrite)
+                    await close_notice.delete()
+                    return
+                dt_now = datetime.now()
+                name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")  # "/tmp/" +
+                await a.save(name)
+                file_names.append(name)
+                await sleep(1)
+                await channel.send(a.proxy_url)
+            else:
+                await channel.send("Error: jpg, jpeg, png画像を投稿してください。")
+                await message.channel.set_permissions(roleA, overwrite=overwrite)
+                await message.channel.set_permissions(roleB, overwrite=overwrite)
+                await close_notice.delete()
+                return
+        embed = Embed(title="分析中...", description="20% 完了")
+        await status.edit(embed=embed)
+        # 設定オン座標調査
+        xy_list = []
+        images = [cv2.imread(file_names[0]), cv2.imread(file_names[1])]
+        for img in images:
+            # BGR色空間からHSV色空間への変換
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
+            upper = np.array([123, 102, 242])
+            # 色検出しきい値範囲内の色を抽出するマスクを作成
+            frame_mask = cv2.inRange(hsv, lower, upper)
+            contours, _ = cv2.findContours(
+                frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
+            for c in contours:
+                result = cv2.moments(c)
+                try:
+                    x, y = int(result["m10"] / result["m00"]
+                               ), int(result["m01"] / result["m00"])
+                except ZeroDivisionError:
+                    continue
+                xy_list.append([x, y])
+            xy_list.append("|")  # ￥のキー
+        embed = Embed(title="分析中...",
+                      description="40% 完了\n一番時間のかかる作業を行っています...")
+        await status.edit(embed=embed)
+        # 座標仕分け
+        separator = xy_list.index("|")
+        xy_0 = xy_list[:separator]
+        try:
+            xy_1 = xy_list[separator + 1:]
+        except IndexError:
+            xy_1 = []
+        else:
+            xy_1.remove("|")
+        xy_01 = [xy_0, xy_1]
+        # モバイルボイスオーバーレイ検出
+        log = "なし"
+        all_text = ""
+        for file_name, xy_ in zip(file_names, xy_01):
+            text_box1 = tool.image_to_string(Image.open(
+                file_name), lang=lang, builder=pyocr.builders.LineBoxBuilder(tesseract_layout=12))
+            text_box2 = tool.image_to_string(Image.open(
+                file_name), lang=lang, builder=pyocr.builders.LineBoxBuilder(tesseract_layout=6))
+            texts_1 = [t for t in text_box1]
+            texts_2 = [t for t in text_box2]
+            texts_list = texts_1 + texts_2
+            for text in texts_list:
+                all_text += text.content.replace(' ', '')
+                if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
+                    text_position = text.position
+                    place_text = [text_position[1][0], text_position[1][1]]
+                    for xy in xy_:
+                        if distance.euclidean(place_text, (xy)) < 200:
+                            xy_.remove(xy)
+                            log += "検知：モバイルボイスオーバーレイ\n"
+                            break
+        # ワード検出(下準備)
+        all_text = all_text.replace('\n', '')
+        if log != "なし":
+            log = log.replace('なし', '')
+        embed = Embed(title="分析中...", description=f"60% 完了\n\n作業ログ\n`{log}`")
+        await status.edit(embed=embed)
+        # ワード検出
+        if "troubleshooting" in all_text:
+            await channel.send("word found: troubleshooting")
+            button = Button(
+                label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
+
+            async def button_callback(interaction):
+                admin = interaction.user.get_role(904368977092964352)  # ビト森杯運営
+                if bool(admin):
+                    await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
+                    await message.author.add_roles(verified)
+                    await interaction.response.send_message(f"✅{message.author.display_name}にverifiedロールを付与しました。")
+            button.callback = button_callback
+            view = View(timeout=None)
+            view.add_item(button)
+            await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
+            await message.channel.set_permissions(roleA, overwrite=overwrite)
+            await message.channel.set_permissions(roleB, overwrite=overwrite)
+            await close_notice.delete()
+            return
+        word_list = ["自動検出", "ノイズ抑制", "エコー除去", "ノイズ低減", "音量調節の自動化", "高度音声検出"]
+        if "ノイズ抑制" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
+            log += "代替: ノイズ抑制→バックグラウンドノイズ"
+            word_list[1] = "バックグラウンドノイズ"
+        for word in word_list:
+            if word not in all_text:
+                error_msg.append(f"・検知失敗: {word}")
+                error_code += 1
+        if error_code > 0:
+            error_msg.append("上記の設定が映るようにしてください。")
+        if "マイクのテスト" in all_text:
+            error_msg.append('・「マイクのテスト」ボタンを押して、感度設定が見える状態にしてください。')
+            error_code += 1
+        if "ハードウェア" in all_text:
+            error_msg.append('・「ハードウェア拡大縮小を有効にする」の項目が映らないようにしてください。')
+            error_code += 1
+        if log != "なし":
+            log = log.replace('なし', '')
+        embed = Embed(title="分析中...", description=f"80% 完了\n\n作業ログ\n`{log}`")
+        await status.edit(embed=embed)
+        # オンの設定検出
+        for xy in xy_0:
+            error_code += 1
+            cv2.circle(images[0], (xy), 65, (0, 0, 255), 20)
+        for xy in xy_1:
+            error_code += 1
+            cv2.circle(images[1], (xy), 65, (0, 0, 255), 20)
+        if len(xy_0) > 0 or len(xy_1) > 0:
+            error_msg.append("・丸で囲われた設定をOFFにしてください。")
+        embed = Embed(title="分析中...", description=f"作業ログ\n`{log}`")
+        await status.edit(embed=embed)
+        # 結果通知
+        files = []
+        if error_code == 0:
+            color = 0x00ff00
+            description = "問題なし\n\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️"
+            await message.author.add_roles(verified)
+        else:
+            color = 0xff0000
+            description = "以下の問題が見つかりました。再提出をお願いします。\n\n"
+            for file_name, img in zip(file_names, images):
+                cv2.imwrite(file_name, img)
+                files.append(discord.File(file_name))
+        embed = Embed(
+            title="分析結果", description=description, color=color)
+        embed.set_footer(text="made by tari3210#9924")
+        value = "なし"
+        if len(error_msg) > 0:
+            error_msg = str(error_msg)[1:-1]
+            error_msg = error_msg.replace(',', '\n')
+            value = error_msg.replace('\'', '') + f"\n\nエラーコード：{error_code}"
+            embed.add_field(name="エラーログ", value=value, inline=False)
+        await channel.send(content=f"{message.author.mention}", embed=embed, files=files)
+        if error_code > 0:
+            await channel.send(f"エラーログの内容に関するご質問は、 {contact.mention} までお願いします。")
+        await message.channel.set_permissions(roleA, overwrite=overwrite)
+        await message.channel.set_permissions(roleB, overwrite=overwrite)
+        await close_notice.delete()
+        return
+
+client.run("OTg5NTQwNjA0ODYwMDU5Njg4.Gd7nvg.spOU7ibuT8-mc3qhChaLxkcKQ30piQkQibUTHg")
