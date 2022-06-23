@@ -30,6 +30,10 @@ print('ビト森杯bot - 画像分析: 起動完了')
 
 @client.event
 async def on_message(message):
+    if message.content == "s.test":
+        await message.channel.send(f"ビト森杯 - 画像分析: {client.latency}")
+        return
+
     if message.content == "s.mt":
         await message.channel.send("メンテナンス中...")
         error = []
