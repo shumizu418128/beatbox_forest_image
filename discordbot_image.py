@@ -303,10 +303,10 @@ async def on_message(message):
                         except ZeroDivisionError:
                             continue
                         xy_sensitive.append([x, y])
-                    closest = None
+                    closest = 9999999
                     for xy in xy_sensitive:
                         color_distance = distance.euclidean(xy, center)
-                        if color_distance < closest or closest is None:
+                        if color_distance < closest:
                             closest = color_distance
                             closest_xy = xy
                     cv2.circle(img, closest_xy, 65, (0, 0, 255), 20)
