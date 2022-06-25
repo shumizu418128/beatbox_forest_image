@@ -127,8 +127,6 @@ async def on_message(message):
             await message.delete()
             return
         await channel.send(f"{message.author.mention}\nご提出ありがとうございます。\n分析を行います。しばらくお待ちください。", delete_after=20)
-        embed = Embed(title="分析中...", description="0% 完了")
-        status = await channel.send(embed=embed)
         tools = pyocr.get_available_tools()
         tool = tools[0]
         langs = tool.get_available_languages()
@@ -169,12 +167,12 @@ async def on_message(message):
                 await message.channel.set_permissions(roleB, overwrite=overwrite)
                 await close_notice.delete()
                 return
-        embed = Embed(title="分析中...", description="20% 完了")
-        await status.edit(embed=embed)
+        embed = Embed(title="分析中...", description="0% 完了")
+        status = await channel.send(embed=embed)
         # 設定オン座標調査
-        xy_list = []
+        xy_lists = [[], []]
         images = [cv2.imread(file_names[0]), cv2.imread(file_names[1])]
-        for img in images:
+        for i, img in zip(range(2), images):
             # BGR色空間からHSV色空間への変換
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
@@ -190,25 +188,14 @@ async def on_message(message):
                                ), int(result["m01"] / result["m00"])
                 except ZeroDivisionError:
                     continue
-                xy_list.append([x, y])
-            xy_list.append("|")  # ￥のキー
-        embed = Embed(title="分析中...",
-                      description="40% 完了\n一番時間のかかる作業を行っています...")
-        await status.edit(embed=embed)
+                xy_list[i].append([x, y])
         # 座標仕分け
-        separator = xy_list.index("|")
-        xy_0 = xy_list[:separator]
-        try:
-            xy_1 = xy_list[separator + 1:]
-        except IndexError:
-            xy_1 = []
-        else:
-            xy_1.remove("|")
-        xy_01 = [xy_0, xy_1]
+        embed = Embed(title="分析中...", description="20% 完了")
+        await status.edit(embed=embed)
         # モバイルボイスオーバーレイ検出
         log = "なし"
         all_text = ""
-        for file_name, xy_ in zip(file_names, xy_01):
+        for file_name, xy_list in zip(file_names, xy_lists):
             text_box1 = tool.image_to_string(Image.open(
                 file_name), lang=lang, builder=pyocr.builders.LineBoxBuilder(tesseract_layout=12))
             text_box2 = tool.image_to_string(Image.open(
@@ -221,16 +208,16 @@ async def on_message(message):
                 if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
                     text_position = text.position
                     place_text = [text_position[1][0], text_position[1][1]]
-                    for xy in xy_:
+                    for xy in xy_list:
                         if distance.euclidean(place_text, (xy)) < 200:
-                            xy_.remove(xy)
+                            xy_list.remove(xy)
                             log += "検知：モバイルボイスオーバーレイ\n"
                             break
         # ワード検出(下準備)
         all_text = all_text.replace('\n', '')
         if log != "なし":
             log = log.replace('なし', '')
-        embed = Embed(title="分析中...", description=f"60% 完了\n\n作業ログ\n`{log}`")
+        embed = Embed(title="分析中...", description=f"40% 完了\n\n作業ログ\n`{log}`")
         await status.edit(embed=embed)
         # ワード検出
         if "troubleshooting" in all_text:
@@ -254,7 +241,7 @@ async def on_message(message):
             return
         word_list = ["自動検出", "ノイズ抑制", "エコー除去", "ノイズ低減", "音量調節の自動化", "高度音声検出"]
         if "ノイズ抑制" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
-            log += "代替: ノイズ抑制→バックグラウンドノイズ"
+            log += "代替: ノイズ抑制→バックグラウンドノイズ\n"
             word_list[1] = "バックグラウンドノイズ"
         for word in word_list:
             if word not in all_text:
@@ -262,25 +249,75 @@ async def on_message(message):
                 error_code += 1
         if error_code > 0:
             error_msg.append("上記の設定が映るようにしてください。")
-        if "マイクのテスト" in all_text:
-            error_msg.append('・「マイクのテスト」ボタンを押して、感度設定が見える状態にしてください。')
-            error_code += 1
         if "ハードウェア" in all_text:
             error_msg.append('・「ハードウェア拡大縮小を有効にする」の項目が映らないようにしてください。')
             error_code += 1
         if log != "なし":
             log = log.replace('なし', '')
-        embed = Embed(title="分析中...", description=f"80% 完了\n\n作業ログ\n`{log}`")
+        embed = Embed(title="分析中...", description=f"60% 完了\n\n作業ログ\n`{log}`")
         await status.edit(embed=embed)
         # オンの設定検出
-        for xy in xy_0:
-            error_code += 1
-            cv2.circle(images[0], (xy), 65, (0, 0, 255), 20)
-        for xy in xy_1:
-            error_code += 1
-            cv2.circle(images[1], (xy), 65, (0, 0, 255), 20)
-        if len(xy_0) > 0 or len(xy_1) > 0:
+        for i, xy_list in zip(range(2), xy_lists):
+            for xy in xy_list:
+                error_code += 1
+                cv2.circle(images[i], (xy), 65, (0, 0, 255), 20)
+        if len(xy_list[0] + xy_list[1]) > 0:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
+        embed = Embed(title="分析中...", description=f"80% 完了\n\n作業ログ\n`{log}`")
+        await status.edit(embed=embed)
+        # 感度設定確認
+        sensitive_exist = False
+        sensitive_check = True
+        for i, img in zip([1, 2], images):
+            height, width = img.shape[:2]
+            all_pixel = str(width * height)
+            center = [width / 3, height / 3]
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
+            lower = np.array([63, 0, 0])  # 色検出しきい値の設定 (みどり)
+            upper = np.array([76, 255, 255])
+            # 色検出しきい値範囲内の色を抽出するマスクを作成
+            frame_mask = cv2.inRange(hsv, lower, upper)
+            green_pixels = cv2.countNonZero(frame_mask)
+            lower = np.array([14, 0, 0])  # 色検出しきい値の設定 (きいろ)
+            upper = np.array([24, 255, 255])
+            # 色検出しきい値範囲内の色を抽出するマスクを作成
+            frame_mask = cv2.inRange(hsv, lower, upper)
+            yellow_pixels = cv2.countNonZero(frame_mask)
+            color_pixel = str(green_pixels + yellow_pixels)
+            fraction_pixel = Decimal(color_pixel) / \
+                Decimal(all_pixel) * Decimal("100")
+            log += f"{i}枚目: {fraction_pixel}\n"
+            log = log.replace('なし', '')
+            if Decimal(fraction_pixel) > Decimal("0.3"):  # 0.3以上で感度あり
+                sensitive_exist = True
+                if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
+                    sensitive_check = False
+                    contours, _ = cv2.findContours(
+                        frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
+                    xy_sensitive = []
+                    for c in contours:
+                        result = cv2.moments(c)
+                        try:
+                            x, y = int(
+                                result["m10"] / result["m00"]), int(result["m01"] / result["m00"])
+                        except ZeroDivisionError:
+                            continue
+                        xy_sensitive.append([x, y])
+                    closest = None
+                    for xy in xy_sensitive:
+                        color_distance = distance.euclidean(xy, center)
+                        if color_distance < closest or closest is None:
+                            closest = color_distance
+                            closest_xy = xy
+                    cv2.circle(img, closest_xy, 65, (0, 0, 255), 20)
+        if sensitive_exist is False:
+            error_msg.append(
+                "・感度設定が映るようにしてください。\n※一部端末では「マイクのテスト」ボタンを押すと表示されます。")
+            error_code += 1
+        if sensitive_check is False:
+            error_msg.append(
+                "・設定感度が低すぎます。丸印のところまで感度を上げてください。\n※丸印は目安です。なるべく感度を上げてください。")
+            error_code += 1
         embed = Embed(title="分析中...", description=f"作業ログ\n`{log}`")
         await status.edit(embed=embed)
         # 結果通知
