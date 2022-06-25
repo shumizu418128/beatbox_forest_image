@@ -211,6 +211,7 @@ async def on_message(message):
                             xy_list.remove(xy)
                             log += "検知：モバイルボイスオーバーレイ\n"
                             break
+        print(all_text)
         # ワード検出(下準備)
         if log != "なし":
             log = log.replace('なし', '')
@@ -244,7 +245,7 @@ async def on_message(message):
         if "ノイズ抑制" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
             log += "代替: ノイズ抑制 → バックグラウンドノイズ\n"
             word_list[1] = "バックグラウンドノイズ"
-        if "入力感度自動調整" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
+        if "高度音声検出" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
             log += "代替: 高度音声検出 → 入力感度自動調整\n"
             word_list[5] = "入力感度自動調整"
         for word in word_list:
