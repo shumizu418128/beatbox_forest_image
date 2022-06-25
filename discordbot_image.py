@@ -257,10 +257,10 @@ async def on_message(message):
         embed = Embed(title="分析中...", description=f"60% 完了\n\n作業ログ\n`{log}`")
         await status.edit(embed=embed)
         # オンの設定検出
-        for i, xy_list in zip(range(2), xy_lists):
+        for img, xy_list in zip(images, xy_lists):
             for xy in xy_list:
                 error_code += 1
-                cv2.circle(images[i], (xy), 65, (0, 0, 255), 20)
+                cv2.circle(img, (xy), 65, (0, 0, 255), 20)
         if len(xy_lists[0]) > 0 and len(xy_lists[1]) > 0:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
         embed = Embed(title="分析中...", description=f"80% 完了\n\n作業ログ\n`{log}`")
@@ -272,7 +272,6 @@ async def on_message(message):
             height, width = img.shape[:2]
             all_pixel = str(width * height)
             center = [width / 3, height / 3]
-            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
             lower = np.array([63, 0, 0])  # 色検出しきい値の設定 (みどり)
             upper = np.array([76, 255, 255])
             # 色検出しきい値範囲内の色を抽出するマスクを作成
