@@ -291,7 +291,7 @@ async def on_message(message):
                 Decimal(all_pixel) * Decimal("100")
             log += f"{i}枚目: {fraction_pixel}\n"
             log = log.replace('なし', '')
-            if Decimal(fraction_pixel) > Decimal("1"):
+            if Decimal(fraction_pixel) > Decimal("1.2"):
                 await channel.send("感度設定判別失敗")
                 button = Button(
                 label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
@@ -311,7 +311,7 @@ async def on_message(message):
                 await close_notice.delete()
                 return
 
-            if Decimal("0.3") < Decimal(fraction_pixel) < Decimal("1.2"):  # 0.3以上で感度あり
+            if Decimal("0.3") < Decimal(fraction_pixel):  # 0.3以上で感度あり
                 sensitive_exist = True
                 if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
                     sensitive_check = False
