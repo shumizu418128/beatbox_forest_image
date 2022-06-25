@@ -188,7 +188,6 @@ async def on_message(message):
                 except ZeroDivisionError:
                     continue
                 xy_lists[i].append([x, y])
-        # 座標仕分け
         embed = Embed(title="分析中...", description="20% 完了")
         await status.edit(embed=embed)
         # モバイルボイスオーバーレイ検出
@@ -216,7 +215,7 @@ async def on_message(message):
         all_text = all_text.replace('\n', '')
         if log != "なし":
             log = log.replace('なし', '')
-        embed = Embed(title="分析中...", description=f"40% 完了\n\n作業ログ\n`{log}`")
+        embed = Embed(title="分析中...", description=f"40% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # ワード検出
         if "troubleshooting" in all_text:
@@ -253,7 +252,7 @@ async def on_message(message):
             error_code += 1
         if log != "なし":
             log = log.replace('なし', '')
-        embed = Embed(title="分析中...", description=f"60% 完了\n\n作業ログ\n`{log}`")
+        embed = Embed(title="分析中...", description=f"60% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # オンの設定検出
         for img, xy_list in zip(images, xy_lists):
@@ -262,7 +261,7 @@ async def on_message(message):
                 cv2.circle(img, (xy), 65, (0, 0, 255), 20)
         if len(xy_lists[0]) > 0 and len(xy_lists[1]) > 0:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
-        embed = Embed(title="分析中...", description=f"80% 完了\n\n作業ログ\n`{log}`")
+        embed = Embed(title="分析中...", description=f"80% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # 感度設定確認
         sensitive_exist = False
@@ -317,7 +316,7 @@ async def on_message(message):
             error_msg.append(
                 "・設定感度が低すぎます。丸印のところまで感度を上げてください。※丸印は目安です。なるべく感度を上げてください。")
             error_code += 1
-        embed = Embed(title="分析中...", description=f"作業ログ\n`{log}`")
+        embed = Embed(title="分析中...", description=f"作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # 結果通知
         files = []
