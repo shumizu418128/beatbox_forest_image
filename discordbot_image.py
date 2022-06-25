@@ -317,7 +317,7 @@ async def on_message(message):
                 await close_notice.delete()
                 return
 
-            if Decimal("0.3") < Decimal(fraction_pixel):  # 0.3以上で感度あり
+            if Decimal("0.5") < Decimal(fraction_pixel):  # 0.5以上で感度あり
                 sensitive_exist = True
                 if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
                     sensitive_check = False
