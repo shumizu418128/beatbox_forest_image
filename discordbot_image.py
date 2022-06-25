@@ -215,7 +215,8 @@ async def on_message(message):
         print(all_text)
         if log != "なし":
             log = log.replace('なし', '')
-        embed = Embed(title="分析中...", description=f"40% 完了\n\n作業ログ\n```\n{log}\n```")
+        embed = Embed(title="分析中...",
+                      description=f"40% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # ワード検出
         if "troubleshooting" in all_text:
@@ -244,6 +245,9 @@ async def on_message(message):
         if "ノイズ抑制" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
             log += "代替: ノイズ抑制 → バックグラウンドノイズ\n"
             word_list[1] = "バックグラウンドノイズ"
+        if "入力感度自動調整" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
+            log += "代替: 高度音声検出 → 入力感度自動調整\n"
+            word_list[5] = "入力感度自動調整"
         for word in word_list:
             if word not in all_text:
                 error_msg.append(f"・検知失敗: {word}")
@@ -255,7 +259,8 @@ async def on_message(message):
             error_code += 1
         if log != "なし":
             log = log.replace('なし', '')
-        embed = Embed(title="分析中...", description=f"60% 完了\n\n作業ログ\n```\n{log}\n```")
+        embed = Embed(title="分析中...",
+                      description=f"60% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # オンの設定検出
         for img, xy_list, file_name in zip(images, xy_lists, file_names):
@@ -266,7 +271,8 @@ async def on_message(message):
         images = [cv2.imread(file_names[0]), cv2.imread(file_names[1])]
         if len(xy_lists[0]) > 0 or len(xy_lists[1]) > 0:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
-        embed = Embed(title="分析中...", description=f"80% 完了\n\n作業ログ\n```\n{log}\n```")
+        embed = Embed(title="分析中...",
+                      description=f"80% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # 感度設定確認
         sensitive_exist = False
@@ -294,10 +300,11 @@ async def on_message(message):
             if Decimal(fraction_pixel) > Decimal("1.2"):
                 await channel.send("感度設定判別失敗")
                 button = Button(
-                label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
+                    label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
 
                 async def button_callback(interaction):
-                    admin = interaction.user.get_role(904368977092964352)  # ビト森杯運営
+                    admin = interaction.user.get_role(
+                        904368977092964352)  # ビト森杯運営
                     if bool(admin):
                         await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                         await message.author.add_roles(verified)
