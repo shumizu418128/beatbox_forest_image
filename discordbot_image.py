@@ -291,6 +291,26 @@ async def on_message(message):
                 Decimal(all_pixel) * Decimal("100")
             log += f"{i}枚目: {fraction_pixel}\n"
             log = log.replace('なし', '')
+            if Decimal(fraction_pixel) > Decimal("1"):
+                await channel.send("感度設定判別失敗")
+                button = Button(
+                label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
+
+                async def button_callback(interaction):
+                    admin = interaction.user.get_role(904368977092964352)  # ビト森杯運営
+                    if bool(admin):
+                        await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
+                        await message.author.add_roles(verified)
+                        await interaction.response.send_message(f"✅{message.author.display_name}にverifiedロールを付与しました。")
+                button.callback = button_callback
+                view = View(timeout=None)
+                view.add_item(button)
+                await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
+                await message.channel.set_permissions(roleA, overwrite=overwrite)
+                await message.channel.set_permissions(roleB, overwrite=overwrite)
+                await close_notice.delete()
+                return
+
             if Decimal("0.3") < Decimal(fraction_pixel) < Decimal("1"):  # 0.3以上で感度あり
                 sensitive_exist = True
                 if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
