@@ -316,7 +316,7 @@ async def on_message(message):
             error_code += 1
         if sensitive_check is False:
             error_msg.append(
-                "・設定感度が低すぎます。丸印のところまで感度を上げてください。\n※丸印は目安です。なるべく感度を上げてください。")
+                "・設定感度が低すぎます。丸印のところまで感度を上げてください。\n ※丸印は目安です。なるべく感度を上げてください。")
             error_code += 1
         embed = Embed(title="分析中...", description=f"作業ログ\n`{log}`")
         await status.edit(embed=embed)
