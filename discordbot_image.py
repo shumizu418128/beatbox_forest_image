@@ -212,7 +212,7 @@ async def on_message(message):
                             log += "検知：モバイルボイスオーバーレイ\n"
                             break
         # ワード検出(下準備)
-        all_text = all_text.replace('\n', '')
+        print(all_text)
         if log != "なし":
             log = log.replace('なし', '')
         embed = Embed(title="分析中...", description=f"40% 完了\n\n作業ログ\n```\n{log}\n```")
@@ -238,8 +238,11 @@ async def on_message(message):
             await close_notice.delete()
             return
         word_list = ["自動検出", "ノイズ抑制", "エコー除去", "ノイズ低減", "音量調節の自動化", "高度音声検出"]
+        if "自動検出" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
+            log += "代替: 自動検出 → 入力モード\n"
+            word_list[0] = "入力モード"
         if "ノイズ抑制" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
-            log += "代替: ノイズ抑制→バックグラウンドノイズ\n"
+            log += "代替: ノイズ抑制 → バックグラウンドノイズ\n"
             word_list[1] = "バックグラウンドノイズ"
         for word in word_list:
             if word not in all_text:
