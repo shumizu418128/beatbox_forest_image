@@ -30,6 +30,9 @@ print('ビト森杯bot - 画像分析: 起動完了')
 
 @client.event
 async def on_message(message):
+    if message.author.bot:
+        return
+
     if message.content == "s.test":
         await message.channel.send(f"ビト森杯 - 画像分析: {client.latency}")
         return
@@ -95,9 +98,6 @@ async def on_message(message):
         await message.channel.send(f"{message.author.mention}\nError: 画像を2枚同時に投稿してください。", delete_after=5)
         if len(message.attachments) == 1:
             await message.channel.send("画像1枚では、すべての設定項目が画像内に収まりません。", delete_after=5)
-        return
-
-    if len(message.attachments) == 2 and message.author.bot:
         return
 
     # 画像提出
