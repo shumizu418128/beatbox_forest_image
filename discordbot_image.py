@@ -261,7 +261,7 @@ async def on_message(message):
             for xy in xy_list:
                 error_code += 1
                 cv2.circle(images[i], (xy), 65, (0, 0, 255), 20)
-        if len(xy_list[0] + xy_list[1]) > 0:
+        if len(xy_list[0]) > 0 and len(xy_list[1]) > 0:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
         embed = Embed(title="分析中...", description=f"80% 完了\n\n作業ログ\n`{log}`")
         await status.edit(embed=embed)
