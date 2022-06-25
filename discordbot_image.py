@@ -173,8 +173,7 @@ async def on_message(message):
         xy_lists = [[], []]
         images = [cv2.imread(file_names[0]), cv2.imread(file_names[1])]
         for i, img in zip(range(2), images):
-            # BGR色空間からHSV色空間への変換
-            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
             lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
             upper = np.array([123, 102, 242])
             # 色検出しきい値範囲内の色を抽出するマスクを作成
@@ -272,6 +271,7 @@ async def on_message(message):
             height, width = img.shape[:2]
             all_pixel = str(width * height)
             center = [width / 3, height / 3]
+            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
             lower = np.array([63, 0, 0])  # 色検出しきい値の設定 (みどり)
             upper = np.array([76, 255, 255])
             # 色検出しきい値範囲内の色を抽出するマスクを作成
