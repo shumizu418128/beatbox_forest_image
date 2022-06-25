@@ -188,7 +188,7 @@ async def on_message(message):
                                ), int(result["m01"] / result["m00"])
                 except ZeroDivisionError:
                     continue
-                xy_list[i].append([x, y])
+                xy_lists[i].append([x, y])
         # 座標仕分け
         embed = Embed(title="分析中...", description="20% 完了")
         await status.edit(embed=embed)
