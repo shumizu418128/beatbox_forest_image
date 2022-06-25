@@ -172,7 +172,7 @@ async def on_message(message):
         # 設定オン座標調査
         xy_lists = [[], []]
         images = [cv2.imread(file_names[0]), cv2.imread(file_names[1])]
-        for i, img in zip(range(2), images):
+        for xy_list, img in zip(xy_lists, images):
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
             lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
             upper = np.array([123, 102, 242])
@@ -187,7 +187,7 @@ async def on_message(message):
                                ), int(result["m01"] / result["m00"])
                 except ZeroDivisionError:
                     continue
-                xy_lists[i].append([x, y])
+                xy_list.append([x, y])
         embed = Embed(title="分析中...", description="20% 完了")
         await status.edit(embed=embed)
         # モバイルボイスオーバーレイ検出
@@ -286,7 +286,7 @@ async def on_message(message):
                 Decimal(all_pixel) * Decimal("100")
             log += f"{i}枚目: {fraction_pixel}\n"
             log = log.replace('なし', '')
-            if Decimal(fraction_pixel) > Decimal("0.3"):  # 0.3以上で感度あり
+            if Decimal("0.3") < Decimal(fraction_pixel) < Decimal("1"):  # 0.3以上で感度あり
                 sensitive_exist = True
                 if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
                     sensitive_check = False
