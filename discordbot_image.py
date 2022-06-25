@@ -211,7 +211,6 @@ async def on_message(message):
                             xy_list.remove(xy)
                             log += "検知：モバイルボイスオーバーレイ\n"
                             break
-        print(all_text)
         # ワード検出(下準備)
         if log != "なし":
             log = log.replace('なし', '')
@@ -329,7 +328,7 @@ async def on_message(message):
                         result = cv2.moments(c)
                         try:
                             x, y = int(
-                                result["m10"] / result["m00"]), int(result["m01"] / result["m00"])
+                                result["m10"] / result["m00"] * 2 / 3), int(result["m01"] / result["m00"])
                         except ZeroDivisionError:
                             continue
                         xy_sensitive.append([x, y])
