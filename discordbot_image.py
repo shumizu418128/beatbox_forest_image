@@ -312,11 +312,11 @@ async def on_message(message):
                     cv2.circle(img, closest_xy, 65, (0, 0, 255), 20)
         if sensitive_exist is False:
             error_msg.append(
-                "・感度設定が映るようにしてください。\n※一部端末では「マイクのテスト」ボタンを押すと表示されます。")
+                "・感度設定が映るようにしてください。一部端末では「マイクのテスト」ボタンを押すと表示されます。")
             error_code += 1
         if sensitive_check is False:
             error_msg.append(
-                "・設定感度が低すぎます。丸印のところまで感度を上げてください。\n ※丸印は目安です。なるべく感度を上げてください。")
+                "・設定感度が低すぎます。丸印のところまで感度を上げてください。※丸印は目安です。なるべく感度を上げてください。")
             error_code += 1
         embed = Embed(title="分析中...", description=f"作業ログ\n`{log}`")
         await status.edit(embed=embed)
