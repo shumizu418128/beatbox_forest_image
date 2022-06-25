@@ -303,7 +303,7 @@ async def on_message(message):
                         except ZeroDivisionError:
                             continue
                         xy_sensitive.append([x, y])
-                    closest = 9999999
+                    closest = 99999999
                     for xy in xy_sensitive:
                         color_distance = distance.euclidean(xy, center)
                         if color_distance < closest:
