@@ -238,14 +238,14 @@ async def on_message(message):
             await message.channel.set_permissions(roleB, overwrite=overwrite)
             await close_notice.delete()
             return
-        word_list = ["自動検出", "ノイズ抑制", "エコー除去", "ノイズ低減", "音量調節の自動化", "高度音声検出"]
-        if "自動検出" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
+        word_list = ["自動検出", "ノイズ抑制", "エコー除去", "低減", "音量調節の自動化", "高度音声検出"]
+        if "自動検出" not in all_text:
             log += "代替: 自動検出 → 入力モード\n"
             word_list[0] = "入力モード"
-        if "ノイズ抑制" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
+        if "ノイズ抑制" not in all_text:
             log += "代替: ノイズ抑制 → バックグラウンドノイズ\n"
             word_list[1] = "バックグラウンドノイズ"
-        if "高度音声検出" not in all_text:  # ノイズ抑制は認識精度低 「マイクからのバックグラウンドノイズ」で代用
+        if "高度音声検出" not in all_text:
             log += "代替: 高度音声検出 → 入力感度自動調整\n"
             word_list[5] = "入力感度自動調整"
         for word in word_list:
