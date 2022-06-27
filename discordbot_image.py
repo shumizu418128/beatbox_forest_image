@@ -353,7 +353,7 @@ async def on_message(message):
         files = []
         if error_code == 0:
             color = 0x00ff00
-            description = "問題なし\n\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️"
+            description = ":ok: \n\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️"
             await message.author.add_roles(verified)
         else:
             color = 0xff0000
