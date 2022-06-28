@@ -36,8 +36,7 @@ async def on_message(message):
         return
 
     if message.content == "s.mt":
-        credentials = get_credits()
-        gc = gspread_asyncio.AsyncioGspreadClientManager(credentials)
+        gc = gspread_asyncio.AsyncioGspreadClientManager(get_credits)
         agc = await gc.authorize()
         workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
         worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
