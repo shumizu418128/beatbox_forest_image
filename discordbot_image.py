@@ -14,18 +14,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 from PIL import Image
 from scipy.spatial import distance
 
-
-async def gspread_setup():
-    scope = ['https://spreadsheets.google.com/feeds',
-             'https://www.googleapis.com/auth/drive',
-             'https://www.googleapis.com/auth/spreadsheets']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        'makesomenoise-4243a19364b1.json', scope)
-    gc = gspread_asyncio.AsyncioGspreadClientManager(credentials)
-    agc = await gc.authorize()
-    workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
-    worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
-    return worksheet
 intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
 intents.typing = False  # typingを受け取らないように
 client = discord.Bot(intents=intents)
@@ -42,7 +30,15 @@ async def on_message(message):
         return
 
     if message.content == "s.mt":
-        worksheet = await gspread_setup()
+        scope = ['https://spreadsheets.google.com/feeds',
+                 'https://www.googleapis.com/auth/drive',
+                 'https://www.googleapis.com/auth/spreadsheets']
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(
+            'makesomenoise-4243a19364b1.json', scope)
+        gc = gspread_asyncio.AsyncioGspreadClientManager(credentials)
+        agc = await gc.authorize()
+        workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
+        worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
         await message.channel.send("メンテナンス中...")
         error = []
         roleA = message.guild.get_role(920320926887862323)  # A部門 ビト森杯
