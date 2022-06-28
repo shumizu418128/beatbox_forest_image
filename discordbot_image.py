@@ -48,8 +48,8 @@ async def on_message(message):
         memberB = set(roleB.members)
         mid_A = [member.id for member in roleA.members]
         mid_B = [member.id for member in roleB.members]
-        DBidA_str = worksheet.col_values(3)
-        DBidB_str = worksheet.col_values(7)
+        DBidA_str = await worksheet.col_values(3)
+        DBidB_str = await worksheet.col_values(7)
         DBidA_str.remove("id")
         DBidB_str.remove("id")
         DBidA = [int(id) for id in DBidA_str]
