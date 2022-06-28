@@ -21,7 +21,7 @@ async def gspread_setup():
              'https://www.googleapis.com/auth/spreadsheets']
     credentials = ServiceAccountCredentials.from_json_keyfile_name(
         'makesomenoise-4243a19364b1.json', scope)
-    gc = await gspread_asyncio.AsyncioGspreadClientManager(credentials)
+    gc = gspread_asyncio.AsyncioGspreadClientManager(credentials)
     agc = await gc.authorize()
     workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
     worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
