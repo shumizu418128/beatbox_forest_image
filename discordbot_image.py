@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import cv2
 import discord
-import gspread
+import gspread_asyncio
 import numpy as np
 import pyocr
 import pyocr.builders
@@ -14,14 +14,18 @@ from oauth2client.service_account import ServiceAccountCredentials
 from PIL import Image
 from scipy.spatial import distance
 
-scope = ['https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
-credentials = ServiceAccountCredentials.from_json_keyfile_name(
-    'makesomenoise-4243a19364b1.json', scope)
-gc = gspread.authorize(credentials)
-SPREADSHEET_KEY = '1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4'
-workbook = gc.open_by_key(SPREADSHEET_KEY)
-worksheet = workbook.worksheet('botデータベース（さわらないでね）')
+
+async def simple_gspread_asyncio():
+    scope = ['https://spreadsheets.google.com/feeds',
+             'https://www.googleapis.com/auth/drive',
+             'https://www.googleapis.com/auth/spreadsheets']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        'makesomenoise-4243a19364b1.json', scope)
+    gc = await gspread_asyncio.AsyncioGspreadClientManager(credentials)
+    agc = await gc.authorize()
+    workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
+    worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
+    return worksheet
 intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
 intents.typing = False  # typingを受け取らないように
 client = discord.Bot(intents=intents)
@@ -38,6 +42,7 @@ async def on_message(message):
         return
 
     if message.content == "s.mt":
+        worksheet = simple_gspread_asyncio()
         await message.channel.send("メンテナンス中...")
         error = []
         roleA = message.guild.get_role(920320926887862323)  # A部門 ビト森杯
@@ -46,12 +51,8 @@ async def on_message(message):
         memberB = set(roleB.members)
         mid_A = [member.id for member in roleA.members]
         mid_B = [member.id for member in roleB.members]
-        try:
-            DBidA_str = worksheet.col_values(3)
-            DBidB_str = worksheet.col_values(7)
-        except gspread.exceptions.APIError as e:
-            await message.channel.send(f"Error: {e}")
-            return
+        DBidA_str = worksheet.col_values(3)
+        DBidB_str = worksheet.col_values(7)
         DBidA_str.remove("id")
         DBidB_str.remove("id")
         DBidA = [int(id) for id in DBidA_str]
