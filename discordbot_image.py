@@ -14,6 +14,12 @@ from oauth2client.service_account import ServiceAccountCredentials
 from PIL import Image
 from scipy.spatial import distance
 
+scope = ['https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive',
+         'https://www.googleapis.com/auth/spreadsheets']
+credentials = ServiceAccountCredentials.from_json_keyfile_name(
+    'makesomenoise-4243a19364b1.json', scope)
+gc = gspread_asyncio.AsyncioGspreadClientManager(credentials)
 intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
 intents.typing = False  # typingを受け取らないように
 client = discord.Bot(intents=intents)
@@ -30,12 +36,6 @@ async def on_message(message):
         return
 
     if message.content == "s.mt":
-        scope = ['https://spreadsheets.google.com/feeds',
-                 'https://www.googleapis.com/auth/drive',
-                 'https://www.googleapis.com/auth/spreadsheets']
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(
-            'makesomenoise-4243a19364b1.json', scope)
-        gc = gspread_asyncio.AsyncioGspreadClientManager(credentials)
         agc = await gc.authorize()
         workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
         worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
