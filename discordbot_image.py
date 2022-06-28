@@ -15,7 +15,7 @@ from PIL import Image
 from scipy.spatial import distance
 
 
-async def simple_gspread_asyncio():
+async def gspread_setup():
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive',
              'https://www.googleapis.com/auth/spreadsheets']
@@ -42,7 +42,7 @@ async def on_message(message):
         return
 
     if message.content == "s.mt":
-        worksheet = simple_gspread_asyncio()
+        worksheet = await gspread_setup()
         await message.channel.send("メンテナンス中...")
         error = []
         roleA = message.guild.get_role(920320926887862323)  # A部門 ビト森杯
