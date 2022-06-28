@@ -23,7 +23,7 @@ RUN pip install git+https://github.com/Pycord-Development/pycord \
     pip install pyocr \
     pip install opencv-python--headless \
     pip install scipy \
-    pip install gspread \
+    pip install gspread_asyncio \
     pip install oauth2client \
     pip install neologdn
 RUN /usr/local/bin/python -m pip install --upgrade pip
