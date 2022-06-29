@@ -25,8 +25,7 @@ RUN pip install git+https://github.com/Pycord-Development/pycord \
     pip install scipy \
     pip install gspread_asyncio \
     pip install oauth2client \
-    pip install neologdn \
-    pip freeze
+    pip install neologdn
 RUN /usr/local/bin/python -m pip install --upgrade pip
 COPY discordbot_image.py discordbot_image.py
 COPY makesomenoise-4243a19364b1.json makesomenoise-4243a19364b1.json
