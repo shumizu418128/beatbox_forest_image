@@ -14,7 +14,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 from PIL import Image
 from scipy.spatial import distance
 
-print(pyocr.__version__)
+from importlib_metadata import version
+print(version('pyocr'))
 def get_credits():
     return ServiceAccountCredentials.from_json_keyfile_name(
         "makesomenoise-4243a19364b1.json",
