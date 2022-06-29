@@ -36,11 +36,11 @@ async def on_message(message):
         return
 
     if message.content == "s.mt":
+        await message.channel.send("メンテナンス中...")
         gc = gspread_asyncio.AsyncioGspreadClientManager(get_credits)
         agc = await gc.authorize()
         workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
         worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
-        await message.channel.send("メンテナンス中...")
         error = []
         roleA = message.guild.get_role(920320926887862323)  # A部門 ビト森杯
         roleB = message.guild.get_role(920321241976541204)  # B部門 ビト森杯
