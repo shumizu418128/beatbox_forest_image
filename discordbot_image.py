@@ -209,7 +209,6 @@ async def on_message(message):
                             xy_list.remove(xy)
                             log += "検知：モバイルボイスオーバーレイ\n"
                             break
-        # ワード検出(下準備)
         if log != "なし":
             log = log.replace('なし', '')
         embed = Embed(title="分析中...",
