@@ -14,16 +14,18 @@ from oauth2client.service_account import ServiceAccountCredentials
 from PIL import Image
 from scipy.spatial import distance
 
+intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
+intents.typing = False  # typingを受け取らないように
+client = discord.Bot(intents=intents)
+print('ビト森杯bot - 画像分析: 起動完了')
+
+
 def get_credits():
     return ServiceAccountCredentials.from_json_keyfile_name(
         "makesomenoise-4243a19364b1.json",
         ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive',
          'https://www.googleapis.com/auth/spreadsheets'])
-intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
-intents.typing = False  # typingを受け取らないように
-client = discord.Bot(intents=intents)
-print('ビト森杯bot - 画像分析: 起動完了')
 
 
 @client.event
