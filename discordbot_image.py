@@ -218,6 +218,7 @@ async def on_message(message):
                       description=f"40% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # ワード検出
+        print(all_text)
         if "troubleshooting" in all_text:
             await channel.send("word found: troubleshooting")
             button = Button(
