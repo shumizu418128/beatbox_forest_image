@@ -125,7 +125,7 @@ async def on_message(message):
             await message.channel.send("Error: ここに画像を送信しないでください。")
             await message.delete()
             return
-        await channel.send(f"{message.author.mention}\nご提出ありがとうございます。\n分析を行います。しばらくお待ちください。", delete_after=20)
+        await channel.send(f"{message.author.mention}\nご提出ありがとうございます。\n分析を行います。しばらくお待ちください。")
         tools = pyocr.get_available_tools()
         tool = tools[0]
         langs = tool.get_available_languages()
@@ -189,7 +189,7 @@ async def on_message(message):
                 except ZeroDivisionError:
                     continue
                 xy_list.append([x, y])
-        embed = Embed(title="分析中...", description="20% 完了")
+        embed = Embed(title="分析中...", description="25% 完了")
         await status.edit(embed=embed)
         # モバイルボイスオーバーレイ検出
         log = "なし"
@@ -215,7 +215,7 @@ async def on_message(message):
         if log != "なし":
             log = log.replace('なし', '')
         embed = Embed(title="分析中...",
-                      description=f"40% 完了\n\n作業ログ\n```\n{log}\n```")
+                      description=f"50% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # ワード検出
         if "troubleshooting" in all_text:
@@ -248,9 +248,6 @@ async def on_message(message):
         if "ハードウェア" in all_text:
             error_msg.append('・「ハードウェア拡大縮小を有効にする」の項目が映らないようにしてください。')
             error_code += 1
-        embed = Embed(title="分析中...",
-                      description=f"60% 完了\n\n作業ログ\n```\n{log}\n```")
-        await status.edit(embed=embed)
         # オンの設定検出
         on_exist = False
         for img, xy_list, file_name in zip(images, xy_lists, file_names):
@@ -266,7 +263,7 @@ async def on_message(message):
         if on_exist:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
         embed = Embed(title="分析中...",
-                      description=f"80% 完了\n\n作業ログ\n```\n{log}\n```")
+                      description=f"75% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # 感度設定確認
         sensitive_exist = False
