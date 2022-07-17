@@ -263,8 +263,8 @@ async def on_message(message):
         # オンの設定検出
         for img, xy_list, file_name in zip(images, xy_lists, file_names):
             for xy, i in zip(xy_list, range(len(xy_list))):
-                height, _ = img.shape[:2]
-                if xy[0] < height * 2 / 3:
+                _, width = img.shape[:2]
+                if xy[0] < width * 2 / 3:
                     del xy_list[i]
                     continue
                 error_code += 1
