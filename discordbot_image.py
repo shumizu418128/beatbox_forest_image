@@ -115,7 +115,7 @@ async def on_message(message):
         admin = message.guild.get_role(904368977092964352)  # ビト森杯運営
         verified = message.guild.get_role(952951691047747655)  # verified
         await message.delete()
-        close_notice = await message.channel.send(f"一時的に提出受付をストップしています。しばらくお待ちください。\n\n※長時間続いている場合は、お手数ですが {contact.mention} までご連絡ください。")
+        close_notice = await message.channel.send(f"一時的に提出受付をストップしています。\nしばらくお待ちください。\n\n※長時間続いている場合は、\nお手数ですが {contact.mention} まで\nご連絡ください。")
         try:
             channel = await message.channel.create_thread(name=f"{message.author.display_name} 分析ログ")
         except AttributeError:
@@ -133,6 +133,7 @@ async def on_message(message):
         file_names = []
         error_msg = []
         error_code = 0
+        # 下準備 保存、画像ファイル判定、縦横比判定
         for a in message.attachments:
             if a.content_type == "image/jpeg" or a.content_type == "image/png":
                 if Decimal(f"{a.height}") / Decimal(f"{a.width}") < Decimal("1.6"):
@@ -155,13 +156,13 @@ async def on_message(message):
                     await close_notice.delete()
                     return
                 dt_now = datetime.now()
-                name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")  # "/tmp/" +
+                name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")
                 await a.save(name)
                 file_names.append(name)
                 await sleep(1)
                 await channel.send(a.proxy_url)
             else:
-                await channel.send("Error: jpg, jpeg, png画像を投稿してください。")
+                await channel.send(f"{message.author.mention}\nError: jpg, jpeg, png画像を投稿してください。")
                 await message.channel.set_permissions(roleA, overwrite=overwrite)
                 await message.channel.set_permissions(roleB, overwrite=overwrite)
                 await close_notice.delete()
@@ -177,7 +178,6 @@ async def on_message(message):
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
             lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
             upper = np.array([123, 172, 252])
-            # 色検出しきい値範囲内の色を抽出するマスクを作成
             frame_mask = cv2.inRange(hsv, lower, upper)
             contours, _ = cv2.findContours(
                 frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
