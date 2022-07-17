@@ -1,5 +1,5 @@
 from asyncio import sleep
-from datetime import datetime
+import datetime
 from decimal import Decimal
 
 import cv2
@@ -116,7 +116,7 @@ async def on_message(message):
         verified = message.guild.get_role(952951691047747655)  # verified
         await message.delete()
         close_notice = await message.channel.send(f"一時的に提出受付をストップしています。\nしばらくお待ちください。\n\n※長時間続いている場合は、\nお手数ですが {contact.mention} まで\nご連絡ください。")
-        dt_now = datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+        dt_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         date = dt_now.strftime('%H:%M')
         try:
             channel = await message.channel.create_thread(name=f"{date} {message.author.display_name} 分析ログ")
@@ -158,7 +158,7 @@ async def on_message(message):
                     await close_notice.delete()
                     return
                 await channel.send(a.proxy_url)
-                dt_now = datetime.now()
+                dt_now = datetime.datetime.now()
                 name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")
                 file_names.append(name)
                 await a.save(name)
