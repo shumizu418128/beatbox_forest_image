@@ -175,7 +175,7 @@ async def on_message(message):
         for xy_list, img in zip(xy_lists, images):
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
             lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
-            upper = np.array([123, 102, 242])
+            upper = np.array([123, 172, 252])
             # 色検出しきい値範囲内の色を抽出するマスクを作成
             frame_mask = cv2.inRange(hsv, lower, upper)
             contours, _ = cv2.findContours(
