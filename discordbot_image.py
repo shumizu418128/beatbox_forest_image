@@ -252,17 +252,18 @@ async def on_message(message):
                       description=f"60% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # オンの設定検出
+        on_exist = False
         for img, xy_list, file_name in zip(images, xy_lists, file_names):
-            for xy, i in zip(xy_list, range(len(xy_list))):
+            for xy in xy_list:
                 _, width = img.shape[:2]
                 if xy[0] < width * 2 / 3:
-                    del xy_list[i]
                     continue
                 error_code += 1
                 cv2.circle(img, (xy), 65, (0, 0, 255), 20)
-                cv2.imwrite(file_name, img)
+                on_exist = True
+            cv2.imwrite(file_name, img)
         images = [cv2.imread(file_names[0]), cv2.imread(file_names[1])]
-        if len(xy_lists[0]) > 0 or len(xy_lists[1]) > 0:
+        if on_exist:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
         embed = Embed(title="分析中...",
                       description=f"80% 完了\n\n作業ログ\n```\n{log}\n```")
