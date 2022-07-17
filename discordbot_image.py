@@ -114,6 +114,7 @@ async def on_message(message):
         bot_channel = client.get_channel(897784178958008322)  # bot用チャット
         admin = message.guild.get_role(904368977092964352)  # ビト森杯運営
         verified = message.guild.get_role(952951691047747655)  # verified
+        await message.delete()
         close_notice = await message.channel.send(f"一時的に提出受付をストップしています。しばらくお待ちください。\n\n※長時間続いている場合は、お手数ですが {contact.mention} までご連絡ください。")
         try:
             channel = await message.channel.create_thread(name=f"{message.author.display_name} 分析ログ")
@@ -158,7 +159,7 @@ async def on_message(message):
                 await a.save(name)
                 file_names.append(name)
                 await sleep(1)
-                await channel.send(a.url)
+                await channel.send(a.proxy_url)
             else:
                 await channel.send("Error: jpg, jpeg, png画像を投稿してください。")
                 await message.channel.set_permissions(roleA, overwrite=overwrite)
@@ -167,7 +168,6 @@ async def on_message(message):
                 return
         if bool(message.content):
             await channel.send(f"`※画像と一緒に送信されたメッセージ文は削除されます。`\nお問い合わせは {contact.mention} までお願いします。")
-        await message.delete()
         embed = Embed(title="分析中...", description="0% 完了")
         status = await channel.send(embed=embed)
         # 設定オン座標調査
