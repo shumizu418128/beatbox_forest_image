@@ -30,6 +30,7 @@ def get_credits():
 
 @client.event
 async def on_message(message):
+    contact = client.get_channel(920620259810086922)  # お問い合わせ
     if message.author.bot:
         return
 
@@ -92,7 +93,6 @@ async def on_message(message):
     if len(message.attachments) != 2 and message.channel.id == 952946795573571654:  # 画像提出
         await message.delete(delay=1)
         if len(message.attachments) == 0:
-            contact = client.get_channel(920620259810086922)  # お問い合わせ
             await message.channel.send(f"お問い合わせは {contact.mention} までお願いします。", delete_after=5)
             return
         await message.channel.send(f"{message.author.mention}\nError: 画像を2枚同時に投稿してください。", delete_after=5)
@@ -111,7 +111,6 @@ async def on_message(message):
         await message.channel.set_permissions(roleA, overwrite=overwrite)
         await message.channel.set_permissions(roleB, overwrite=overwrite)
         overwrite.send_messages = True
-        contact = client.get_channel(920620259810086922)  # お問い合わせ
         bot_channel = client.get_channel(897784178958008322)  # bot用チャット
         admin = message.guild.get_role(904368977092964352)  # ビト森杯運営
         verified = message.guild.get_role(952951691047747655)  # verified
@@ -166,6 +165,8 @@ async def on_message(message):
                 await message.channel.set_permissions(roleB, overwrite=overwrite)
                 await close_notice.delete()
                 return
+        if bool(message.content):
+            await channel.send(f"`※画像と一緒に送信されたメッセージ文は削除されます。`\nお問い合わせは {contact.mention} までお願いします。")
         await message.delete()
         embed = Embed(title="分析中...", description="0% 完了")
         status = await channel.send(embed=embed)
