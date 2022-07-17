@@ -155,12 +155,12 @@ async def on_message(message):
                     await message.channel.set_permissions(roleB, overwrite=overwrite)
                     await close_notice.delete()
                     return
+                await channel.send(a.proxy_url)
                 dt_now = datetime.now()
                 name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")
-                await a.save(name)
                 file_names.append(name)
+                await a.save(name)
                 await sleep(1)
-                await channel.send(a.proxy_url)
             else:
                 await channel.send(f"{message.author.mention}\nError: jpg, jpeg, png画像を投稿してください。")
                 await message.channel.set_permissions(roleA, overwrite=overwrite)
@@ -333,7 +333,7 @@ async def on_message(message):
                     cv2.circle(img, closest_xy, 65, (0, 0, 255), 20)
             if i == 1:
                 embed = Embed(title="分析中...",
-                      description=f"80% 完了\n\n作業ログ\n```\n{log}\n```")
+                              description=f"80% 完了\n\n作業ログ\n```\n{log}\n```")
                 await status.edit(embed=embed)
         if sensitive_exist is False:
             error_msg.append(
