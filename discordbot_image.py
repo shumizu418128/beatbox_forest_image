@@ -262,7 +262,11 @@ async def on_message(message):
         await status.edit(embed=embed)
         # オンの設定検出
         for img, xy_list, file_name in zip(images, xy_lists, file_names):
-            for xy in xy_list:
+            for xy, i in xy_list. range(len(xy_list)):
+                height, _ = img.shape[:2]
+                if xy[0] < height * 2 / 3:
+                    del xy_list[i]
+                    continue
                 error_code += 1
                 cv2.circle(img, (xy), 65, (0, 0, 255), 20)
                 cv2.imwrite(file_name, img)
