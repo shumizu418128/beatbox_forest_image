@@ -189,7 +189,7 @@ async def on_message(message):
                 except ZeroDivisionError:
                     continue
                 xy_list.append([x, y])
-        embed = Embed(title="分析中...", description="25% 完了")
+        embed = Embed(title="分析中...", description="20% 完了")
         await status.edit(embed=embed)
         # モバイルボイスオーバーレイ検出
         log = "なし"
@@ -215,7 +215,7 @@ async def on_message(message):
         if log != "なし":
             log = log.replace('なし', '')
         embed = Embed(title="分析中...",
-                      description=f"50% 完了\n\n作業ログ\n```\n{log}\n```")
+                      description=f"40% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # ワード検出
         if "troubleshooting" in all_text:
@@ -263,7 +263,7 @@ async def on_message(message):
         if on_exist:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
         embed = Embed(title="分析中...",
-                      description=f"75% 完了\n\n作業ログ\n```\n{log}\n```")
+                      description=f"60% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         # 感度設定確認
         sensitive_exist = False
@@ -308,7 +308,6 @@ async def on_message(message):
                 await message.channel.set_permissions(roleB, overwrite=overwrite)
                 await close_notice.delete()
                 return
-
             if Decimal("0.5") < Decimal(fraction_pixel):  # 0.5以上で感度あり
                 sensitive_exist = True
                 if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
@@ -331,6 +330,10 @@ async def on_message(message):
                             closest = color_distance
                             closest_xy = xy
                     cv2.circle(img, closest_xy, 65, (0, 0, 255), 20)
+            if i == 1:
+                embed = Embed(title="分析中...",
+                      description=f"80% 完了\n\n作業ログ\n```\n{log}\n```")
+                await status.edit(embed=embed)
         if sensitive_exist is False:
             error_msg.append(
                 "・感度設定が映るようにしてください。一部端末では「マイクのテスト」ボタンを押すと表示されます。")
