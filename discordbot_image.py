@@ -116,8 +116,10 @@ async def on_message(message):
         verified = message.guild.get_role(952951691047747655)  # verified
         await message.delete()
         close_notice = await message.channel.send(f"一時的に提出受付をストップしています。\nしばらくお待ちください。\n\n※長時間続いている場合は、\nお手数ですが {contact.mention} まで\nご連絡ください。")
+        dt_now = datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+        date = dt_now.strftime('%H:%M')
         try:
-            channel = await message.channel.create_thread(name=f"{message.author.display_name} 分析ログ")
+            channel = await message.channel.create_thread(name=f"{date} {message.author.display_name} 分析ログ")
         except AttributeError:
             await message.channel.set_permissions(roleA, overwrite=overwrite)
             await message.channel.set_permissions(roleB, overwrite=overwrite)
