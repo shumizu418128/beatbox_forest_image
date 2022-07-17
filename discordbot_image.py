@@ -189,8 +189,6 @@ async def on_message(message):
                 except ZeroDivisionError:
                     continue
                 xy_list.append([x, y])
-        embed = Embed(title="分析中...", description="20% 完了")
-        await status.edit(embed=embed)
         # モバイルボイスオーバーレイ検出
         log = "なし"
         all_text = ""
@@ -212,6 +210,9 @@ async def on_message(message):
                             xy_list.remove(xy)
                             log += "検知：モバイルボイスオーバーレイ\n"
                             break
+            if file_name == file_names[0]:
+                embed = Embed(title="分析中...", description="20% 完了")
+                await status.edit(embed=embed)
         if log != "なし":
             log = log.replace('なし', '')
         embed = Embed(title="分析中...",
