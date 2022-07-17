@@ -238,27 +238,17 @@ async def on_message(message):
             await message.channel.set_permissions(roleB, overwrite=overwrite)
             await close_notice.delete()
             return
-        word_list = ["自動検出", "ノイズ抑制", "エコー除去", "低減", "音量調節の自動化", "高度音声検出"]
-        if "自動検出" not in all_text:
-            log += "代替: 自動検出 → 入力モード\n"
-            word_list[0] = "入力モード"
-        if "ノイズ抑制" not in all_text:
-            log += "代替: ノイズ抑制 → バックグラウンドノイズ\n"
-            word_list[1] = "バックグラウンドノイズ"
-        if "高度音声検出" not in all_text:
-            log += "代替: 高度音声検出 → 入力感度自動調整\n"
-            word_list[5] = "入力感度自動調整"
-        for word in word_list:
-            if word not in all_text:
-                error_msg.append(f"・検知失敗: {word}")
+        word_list = ["自動検出", "ノイズ抑制", "高度音声検出"]
+        word_list2 = ["入力モード", "バックグラウンドノイズ", "入力感度自動調整"]
+        for word, word2 in zip(word_list, word_list2):
+            if word not in all_text and word2 not in all_text:
+                error_msg.append(f"・検知失敗: 設定「{word}」")
                 error_code += 1
         if error_code > 0:
             error_msg.append("上記の設定が映るようにしてください。")
         if "ハードウェア" in all_text:
             error_msg.append('・「ハードウェア拡大縮小を有効にする」の項目が映らないようにしてください。')
             error_code += 1
-        if log != "なし":
-            log = log.replace('なし', '')
         embed = Embed(title="分析中...",
                       description=f"60% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
