@@ -216,6 +216,8 @@ async def on_message(message):
                         title="分析中止", description=f"作業ログ\n```\n{log}\n```")
                     button = Button(
                         label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
+                    button_reject = Button(
+                        label="問題あり", style=discord.ButtonStyle.red, emoji="❌")
 
                     async def button_callback(interaction):
                         admin = interaction.user.get_role(
@@ -223,10 +225,18 @@ async def on_message(message):
                         if bool(admin):
                             await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                             await message.author.add_roles(verified)
-                            await interaction.response.send_message(f"✅{message.author.display_name}にverifiedロールを付与しました。")
+                            await interaction.response.send_message(f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️")
+
+                    async def button_reject_callback(interaction):
+                        admin = interaction.user.get_role(
+                            904368977092964352)  # ビト森杯運営
+                        if bool(admin):
+                            await interaction.response.send_message(f"{message.author.mention}\n確認の結果、問題が見つかりました。再提出をお願いします。\n\n`運営は問題内容をこのチャットに書いてください。`")
                     button.callback = button_callback
+                    button_reject.callback = button_reject_callback
                     view = View(timeout=None)
                     view.add_item(button)
+                    view.add_item(button_reject)
                     await status.edit(embed=embed)
                     await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
                     await message.channel.set_permissions(roleA, overwrite=overwrite)
@@ -301,16 +311,27 @@ async def on_message(message):
             embed = Embed(title="分析中止", description=f"作業ログ\n```\n{log}\n```")
             button = Button(
                 label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
+            button_reject = Button(
+                label="問題あり", style=discord.ButtonStyle.red, emoji="❌")
 
             async def button_callback(interaction):
-                admin = interaction.user.get_role(904368977092964352)  # ビト森杯運営
+                admin = interaction.user.get_role(
+                    904368977092964352)  # ビト森杯運営
                 if bool(admin):
                     await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                     await message.author.add_roles(verified)
-                    await interaction.response.send_message(f"✅{message.author.display_name}にverifiedロールを付与しました。")
+                    await interaction.response.send_message(f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️")
+
+            async def button_reject_callback(interaction):
+                admin = interaction.user.get_role(
+                    904368977092964352)  # ビト森杯運営
+                if bool(admin):
+                    await interaction.response.send_message(f"{message.author.mention}\n確認の結果、問題が見つかりました。再提出をお願いします。\n\n`運営は問題内容をこのチャットに書いてください。`")
             button.callback = button_callback
+            button_reject.callback = button_reject_callback
             view = View(timeout=None)
             view.add_item(button)
+            view.add_item(button_reject)
             await status.edit(embed=embed)
             await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
             await message.channel.set_permissions(roleA, overwrite=overwrite)
@@ -371,6 +392,8 @@ async def on_message(message):
                     title="分析中止", description=f"作業ログ\n```\n{log}\n```")
                 button = Button(
                     label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
+                button_reject = Button(
+                    label="問題あり", style=discord.ButtonStyle.red, emoji="❌")
 
                 async def button_callback(interaction):
                     admin = interaction.user.get_role(
@@ -378,10 +401,18 @@ async def on_message(message):
                     if bool(admin):
                         await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                         await message.author.add_roles(verified)
-                        await interaction.response.send_message(f"✅{message.author.display_name}にverifiedロールを付与しました。")
+                        await interaction.response.send_message(f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️")
+
+                async def button_reject_callback(interaction):
+                    admin = interaction.user.get_role(
+                        904368977092964352)  # ビト森杯運営
+                    if bool(admin):
+                        await interaction.response.send_message(f"{message.author.mention}\n確認の結果、問題が見つかりました。再提出をお願いします。\n\n`運営は問題内容をこのチャットに書いてください。`")
                 button.callback = button_callback
+                button_reject.callback = button_reject_callback
                 view = View(timeout=None)
                 view.add_item(button)
+                view.add_item(button_reject)
                 await status.edit(embed=embed)
                 await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
                 await message.channel.set_permissions(roleA, overwrite=overwrite)
