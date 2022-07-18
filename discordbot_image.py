@@ -136,6 +136,8 @@ async def on_message(message):
         error_msg = []
         error_code = 0
         # 下準備 保存、画像ファイル判定、縦横比判定
+        await channel.send(message.attachments[0].proxy_url)
+        await channel.send(message.attachments[1].proxy_url)
         for a in message.attachments:
             if a.content_type == "image/jpeg" or a.content_type == "image/png":
                 if Decimal(f"{a.height}") / Decimal(f"{a.width}") < Decimal("1.6"):
@@ -157,7 +159,6 @@ async def on_message(message):
                     await message.channel.set_permissions(roleB, overwrite=overwrite)
                     await close_notice.delete()
                     return
-                await channel.send(a.proxy_url)
                 dt_now = datetime.datetime.now()
                 name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")
                 file_names.append(name)
