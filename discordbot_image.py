@@ -90,7 +90,8 @@ async def maintenance():
 
 @client.event
 async def on_ready():
-    maintenance.start()
+  #  maintenance.start()
+    return
 
 
 @client.event
