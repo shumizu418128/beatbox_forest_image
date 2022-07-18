@@ -146,7 +146,8 @@ async def on_message(message):
             if a.content_type == "image/jpeg" or a.content_type == "image/png":
                 if Decimal(f"{a.height}") / Decimal(f"{a.width}") < Decimal("1.6"):
                     log += "縦横比1.6以上"
-                    embed = Embed(title="分析中止", description=f"作業ログ\n```\n{log}\n```")
+                    embed = Embed(
+                        title="分析中止", description=f"作業ログ\n```\n{log}\n```")
                     button = Button(
                         label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
 
@@ -230,7 +231,7 @@ async def on_message(message):
         await status.edit(embed=embed)
         # ワード検出
         if "troubleshooting" in all_text:
-            log += "word found: troubleshooting"
+            log += "検知: troubleshooting"
             embed = Embed(title="分析中止", description=f"作業ログ\n```\n{log}\n```")
             button = Button(
                 label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
@@ -302,7 +303,8 @@ async def on_message(message):
             log += f"{i}枚目: {fraction_pixel}\n"
             if Decimal(fraction_pixel) > Decimal("1.2"):
                 log += "感度設定判別失敗"
-                embed = Embed(title="分析中止", description=f"作業ログ\n```\n{log}\n```")
+                embed = Embed(
+                    title="分析中止", description=f"作業ログ\n```\n{log}\n```")
                 button = Button(
                     label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
 
