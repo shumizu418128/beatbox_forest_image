@@ -145,6 +145,8 @@ async def on_message(message):
         for a in message.attachments:
             if a.content_type == "image/jpeg" or a.content_type == "image/png":
                 if Decimal(f"{a.height}") / Decimal(f"{a.width}") < Decimal("1.6"):
+                    log += "縦横比1.6以上"
+                    embed = Embed(title="分析中止", description=f"作業ログ\n```\n{log}\n```")
                     button = Button(
                         label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
 
@@ -158,6 +160,7 @@ async def on_message(message):
                     button.callback = button_callback
                     view = View(timeout=None)
                     view.add_item(button)
+                    await status.edit(embed=embed)
                     await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
                     await message.channel.set_permissions(roleA, overwrite=overwrite)
                     await message.channel.set_permissions(roleB, overwrite=overwrite)
@@ -227,7 +230,8 @@ async def on_message(message):
         await status.edit(embed=embed)
         # ワード検出
         if "troubleshooting" in all_text:
-            await channel.send("word found: troubleshooting")
+            log += "word found: troubleshooting"
+            embed = Embed(title="分析中止", description=f"作業ログ\n```\n{log}\n```")
             button = Button(
                 label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
 
@@ -240,6 +244,7 @@ async def on_message(message):
             button.callback = button_callback
             view = View(timeout=None)
             view.add_item(button)
+            await status.edit(embed=embed)
             await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
             await message.channel.set_permissions(roleA, overwrite=overwrite)
             await message.channel.set_permissions(roleB, overwrite=overwrite)
@@ -296,7 +301,8 @@ async def on_message(message):
                 Decimal(all_pixel) * Decimal("100")
             log += f"{i}枚目: {fraction_pixel}\n"
             if Decimal(fraction_pixel) > Decimal("1.2"):
-                await channel.send("感度設定判別失敗")
+                log += "感度設定判別失敗"
+                embed = Embed(title="分析中止", description=f"作業ログ\n```\n{log}\n```")
                 button = Button(
                     label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
 
@@ -310,6 +316,7 @@ async def on_message(message):
                 button.callback = button_callback
                 view = View(timeout=None)
                 view.add_item(button)
+                await status.edit(embed=embed)
                 await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
                 await message.channel.set_permissions(roleA, overwrite=overwrite)
                 await message.channel.set_permissions(roleB, overwrite=overwrite)
@@ -370,7 +377,7 @@ async def on_message(message):
             error_msg = error_msg.replace(',', '\n')
             value = error_msg.replace('\'', '') + f"\n\nエラーコード：{error_code}"
             embed.add_field(name="エラーログ", value=value, inline=False)
-        embed = Embed(title="分析中...", description=f"作業ログ\n```\n{log}\n```")
+        embed = Embed(title="分析完了", description=f"作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
         await channel.send(content=f"{message.author.mention}", embed=embed, files=files)
         if error_code > 0:
