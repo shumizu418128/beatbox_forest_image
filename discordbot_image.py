@@ -283,7 +283,7 @@ async def on_message(message):
         sensitive_exist = False
         sensitive_check = True
         for i, img in zip([1, 2], images):
-            height, width = img.shape[:2]
+            height, width = img.shape[:2]  # height -> Y座標  width -> X座標
             all_pixel = str(width * height)
             center = [width / 3, height / 3]
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
