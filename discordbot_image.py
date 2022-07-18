@@ -116,7 +116,8 @@ async def on_message(message):
         verified = message.guild.get_role(952951691047747655)  # verified
         await message.delete()
         close_notice = await message.channel.send(f"一時的に提出受付をストップしています。\nしばらくお待ちください。\n\n※長時間続いている場合は、\nお手数ですが {contact.mention} まで\nご連絡ください。")
-        dt_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+        dt_now = datetime.datetime.now(
+            datetime.timezone(datetime.timedelta(hours=9)))
         date = dt_now.strftime('%H:%M:%S')
         try:
             channel = await message.channel.create_thread(name=f"{date} {message.author.display_name} 分析ログ")
@@ -138,6 +139,9 @@ async def on_message(message):
         # 下準備 保存、画像ファイル判定、縦横比判定
         await channel.send(message.attachments[0].proxy_url)
         await channel.send(message.attachments[1].proxy_url)
+        log = ""
+        embed = Embed(title="分析中...")
+        status = await channel.send(embed=embed)
         for a in message.attachments:
             if a.content_type == "image/jpeg" or a.content_type == "image/png":
                 if Decimal(f"{a.height}") / Decimal(f"{a.width}") < Decimal("1.6"):
@@ -163,17 +167,19 @@ async def on_message(message):
                 name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")
                 file_names.append(name)
                 await a.save(name)
+                log += f"{name.replace('/tmp/', '')}\n"
                 await sleep(1)
             else:
-                await channel.send(f"{message.author.mention}\nError: jpg, jpeg, png画像を投稿してください。")
+                await channel.send(f"{message.author.mention}\nError: \n画像を認識できませんでした。\nJPG, JPEG, PNG画像を提出してください。")
                 await message.channel.set_permissions(roleA, overwrite=overwrite)
                 await message.channel.set_permissions(roleB, overwrite=overwrite)
                 await close_notice.delete()
                 return
         if bool(message.content):
             await channel.send(f"`※画像と一緒に送信されたメッセージ文は削除されます。`\nお問い合わせは {contact.mention} までお願いします。")
-        embed = Embed(title="分析中...", description="0% 完了")
-        status = await channel.send(embed=embed)
+        embed = Embed(title="分析中...",
+                      description=f"0% 完了\n\n作業ログ\n```\n{log}\n```")
+        await status.edit(embed=embed)
         # 設定オン座標調査
         xy_lists = [[], []]
         images = [cv2.imread(file_names[0]), cv2.imread(file_names[1])]
@@ -193,7 +199,6 @@ async def on_message(message):
                     continue
                 xy_list.append([x, y])
         # モバイルボイスオーバーレイ検出
-        log = "なし"
         all_text = ""
         for file_name, xy_list in zip(file_names, xy_lists):
             text_box1 = tool.image_to_string(Image.open(
@@ -214,10 +219,9 @@ async def on_message(message):
                             log += "検知：モバイルボイスオーバーレイ\n"
                             break
             if file_name == file_names[0]:
-                embed = Embed(title="分析中...", description="20% 完了")
+                embed = Embed(title="分析中...",
+                              description=f"20% 完了\n\n作業ログ\n```\n{log}\n```")
                 await status.edit(embed=embed)
-        if log != "なし":
-            log = log.replace('なし', '')
         embed = Embed(title="分析中...",
                       description=f"40% 完了\n\n作業ログ\n```\n{log}\n```")
         await status.edit(embed=embed)
@@ -291,7 +295,6 @@ async def on_message(message):
             fraction_pixel = Decimal(color_pixel) / \
                 Decimal(all_pixel) * Decimal("100")
             log += f"{i}枚目: {fraction_pixel}\n"
-            log = log.replace('なし', '')
             if Decimal(fraction_pixel) > Decimal("1.2"):
                 await channel.send("感度設定判別失敗")
                 button = Button(
@@ -346,8 +349,6 @@ async def on_message(message):
             error_msg.append(
                 "・設定感度が低すぎます。丸印のところまで感度を上げてください。※丸印は目安です。なるべく感度を上げてください。")
             error_code += 1
-        embed = Embed(title="分析中...", description=f"作業ログ\n```\n{log}\n```")
-        await status.edit(embed=embed)
         # 結果通知
         files = []
         if error_code == 0:
@@ -369,6 +370,8 @@ async def on_message(message):
             error_msg = error_msg.replace(',', '\n')
             value = error_msg.replace('\'', '') + f"\n\nエラーコード：{error_code}"
             embed.add_field(name="エラーログ", value=value, inline=False)
+        embed = Embed(title="分析中...", description=f"作業ログ\n```\n{log}\n```")
+        await status.edit(embed=embed)
         await channel.send(content=f"{message.author.mention}", embed=embed, files=files)
         if error_code > 0:
             await channel.send(f"エラーログの内容に関するご質問は、 {contact.mention} までお願いします。")
