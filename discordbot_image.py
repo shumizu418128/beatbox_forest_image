@@ -272,8 +272,6 @@ async def on_message(message):
                 error_code += 1
                 cv2.circle(img, (xy), 65, (0, 0, 255), 20)
                 on_exist = True
-            cv2.imwrite(file_name, img)
-        images = [cv2.imread(file_names[0]), cv2.imread(file_names[1])]
         if on_exist:
             error_msg.append("・丸で囲われた設定をOFFにしてください。")
         embed = Embed(title="分析中...",
