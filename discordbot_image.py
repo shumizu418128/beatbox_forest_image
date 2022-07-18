@@ -379,8 +379,8 @@ async def on_message(message):
             error_msg = error_msg.replace(',', '\n')
             value = error_msg.replace('\'', '') + f"\n\nエラーコード：{error_code}"
             embed.add_field(name="エラーログ", value=value, inline=False)
-        embed = Embed(title="分析完了", description=f"作業ログ\n```\n{log}\n```")
-        await status.edit(embed=embed)
+        embed2 = Embed(title="分析完了", description=f"作業ログ\n```\n{log}\n```")
+        await status.edit(embed=embed2)
         await channel.send(content=f"{message.author.mention}", embed=embed, files=files)
         if error_code > 0:
             await channel.send(f"エラーログの内容に関するご質問は、 {contact.mention} までお願いします。")
