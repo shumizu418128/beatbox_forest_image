@@ -117,7 +117,7 @@ async def on_message(message):
         await message.delete()
         close_notice = await message.channel.send(f"一時的に提出受付をストップしています。\nしばらくお待ちください。\n\n※長時間続いている場合は、\nお手数ですが {contact.mention} まで\nご連絡ください。")
         dt_now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-        date = dt_now.strftime('%H:%M')
+        date = dt_now.strftime('%H:%M:%S')
         try:
             channel = await message.channel.create_thread(name=f"{date} {message.author.display_name} 分析ログ")
         except AttributeError:
