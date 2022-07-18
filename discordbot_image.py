@@ -1,5 +1,5 @@
-from asyncio import sleep
 import datetime
+from asyncio import sleep
 from decimal import Decimal
 
 import cv2
