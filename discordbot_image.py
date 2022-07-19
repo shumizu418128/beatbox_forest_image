@@ -385,7 +385,7 @@ async def on_message(message):
             color_pixel = str(green_pixels + yellow_pixels)
             fraction_pixel = Decimal(color_pixel) / \
                 Decimal(all_pixel) * Decimal("100")
-            log += f"{i}枚目: {fraction_pixel}\n"
+            log += f"{fraction_pixel}\n"
             if Decimal(fraction_pixel) > Decimal("1.2"):
                 log += "感度設定判別失敗"
                 embed = Embed(
