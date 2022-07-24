@@ -86,12 +86,12 @@ async def maintenance():
             error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
         # メンテその5 DB名前確認
         for name in set(DBnamesA) - set(member_name_A):
-            index = member_name_A.index(name)
+            index = DBnamesA.index(name)
             member = notice.guild.get_member(DBidA[index])
             error.append(
                 f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidA[index]}")
         for name in set(DBnamesB) - set(member_name_B):
-            index = member_name_B.index(name)
+            index = DBnamesB.index(name)
             member = notice.guild.get_member(DBidB[index])
             error.append(
                 f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidB[index]}")
@@ -172,12 +172,12 @@ async def on_message(message):
             error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
         # メンテその5 DB名前確認
         for name in set(DBnamesA) - set(member_name_A):
-            index = member_name_A.index(name)
+            index = DBnamesA.index(name)
             member = message.guild.get_member(DBidA[index])
             error.append(
                 f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidA[index]}")
         for name in set(DBnamesB) - set(member_name_B):
-            index = member_name_B.index(name)
+            index = DBnamesB.index(name)
             member = message.guild.get_member(DBidB[index])
             error.append(
                 f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidB[index]}")
