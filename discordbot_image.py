@@ -85,14 +85,14 @@ async def maintenance():
             member = notice.guild.get_member(id)
             error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
         # メンテその5 DB名前確認
-        for DB, name in zip(DBnamesA, member_name_A):
-            if DB != name:
-                index = member_name_A.index(name)
-                error.append(f"・ニックネーム変更検知\n{name}\nID: {DBidA[index]}")
-        for DB, name in zip(DBnamesB, member_name_B):
-            if DB != name:
-                index = member_name_B.index(name)
-                error.append(f"・ニックネーム変更検知\n{name}\nID: {DBidB[index]}")
+        for name in set(DBnamesA) - set(member_name_A):
+            index = member_name_A.index(name)
+            member = notice.guild.get_member(DBidA[index])
+            error.append(f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidA[index]}")
+        for name in set(DBnamesB) - set(member_name_B):
+            index = member_name_B.index(name)
+            member = notice.guild.get_member(DBidB[index])
+            error.append(f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidB[index]}")
         if error == []:
             await channel.send("定期メンテナンス: エラーなし")
             return
@@ -169,14 +169,14 @@ async def on_message(message):
             member = message.guild.get_member(id)
             error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
         # メンテその5 DB名前確認
-        for DB, name in zip(DBnamesA, member_name_A):
-            if DB != name:
-                index = member_name_A.index(name)
-                error.append(f"・ニックネーム変更検知\n{name}\nID: {DBidA[index]}")
-        for DB, name in zip(DBnamesB, member_name_B):
-            if DB != name:
-                index = member_name_B.index(name)
-                error.append(f"・ニックネーム変更検知\n{name}\nID: {DBidB[index]}")
+        for name in set(DBnamesA) - set(member_name_A):
+            index = member_name_A.index(name)
+            member = message.guild.get_member(DBidA[index])
+            error.append(f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidA[index]}")
+        for name in set(DBnamesB) - set(member_name_B):
+            index = member_name_B.index(name)
+            member = message.guild.get_member(DBidB[index])
+            error.append(f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidB[index]}")
         if error == []:
             await message.channel.send("エラーなし")
             return
