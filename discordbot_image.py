@@ -54,6 +54,12 @@ async def maintenance():
         DBidB_str.remove("id")
         DBidA = [int(id) for id in DBidA_str]
         DBidB = [int(id) for id in DBidB_str]
+        DBnamesA = await worksheet.col_values(1)
+        DBnamesB = await worksheet.col_values(5)
+        DBnamesA.remove("A部門 参加者名 (display_name)")
+        DBnamesB.remove("B部門 参加者名 (display_name)")
+        member_name_A = [member.display_name for member in roleA.members]
+        member_name_B = [member.display_name for member in roleB.members]
         # メンテその1 重複ロール付与
         for member in memberA & memberB:
             error.append(f"・重複ロール付与\n{member.display_name}\nID: {member.id}")
@@ -78,6 +84,15 @@ async def maintenance():
         for id in set(DBidA) & set(DBidB):
             member = notice.guild.get_member(id)
             error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
+        # メンテその5 DB名前確認
+        for DB, name in zip(DBnamesA, member_name_A):
+            if DB != name:
+                index = member_name_A.index(name)
+                error.append(f"・ニックネーム変更検知\n{name}\nID: {DBidA[index]}")
+        for DB, name in zip(DBnamesB, member_name_B):
+            if DB != name:
+                index = member_name_B.index(name)
+                error.append(f"・ニックネーム変更検知\n{name}\nID: {DBidB[index]}")
         if error == []:
             await channel.send("定期メンテナンス: エラーなし")
             return
@@ -123,6 +138,12 @@ async def on_message(message):
         DBidB_str.remove("id")
         DBidA = [int(id) for id in DBidA_str]
         DBidB = [int(id) for id in DBidB_str]
+        DBnamesA = await worksheet.col_values(1)
+        DBnamesB = await worksheet.col_values(5)
+        DBnamesA.remove("A部門 参加者名 (display_name)")
+        DBnamesB.remove("B部門 参加者名 (display_name)")
+        member_name_A = [member.display_name for member in roleA.members]
+        member_name_B = [member.display_name for member in roleB.members]
         # メンテその1 重複ロール付与
         for member in memberA & memberB:
             error.append(f"・重複ロール付与\n{member.display_name}\nID: {member.id}")
@@ -147,6 +168,15 @@ async def on_message(message):
         for id in set(DBidA) & set(DBidB):
             member = message.guild.get_member(id)
             error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
+        # メンテその5 DB名前確認
+        for DB, name in zip(DBnamesA, member_name_A):
+            if DB != name:
+                index = member_name_A.index(name)
+                error.append(f"・ニックネーム変更検知\n{name}\nID: {DBidA[index]}")
+        for DB, name in zip(DBnamesB, member_name_B):
+            if DB != name:
+                index = member_name_B.index(name)
+                error.append(f"・ニックネーム変更検知\n{name}\nID: {DBidB[index]}")
         if error == []:
             await message.channel.send("エラーなし")
             return
