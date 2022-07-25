@@ -385,7 +385,7 @@ async def on_message(message):
             error_code += 1
         # オンの設定検出
         on_exist = False
-        for img, xy_list, file_name in zip(images, xy_lists, file_names):
+        for img, xy_list in zip(images, xy_lists):
             for xy in xy_list:
                 _, width = img.shape[:2]
                 if xy[0] < width * 2 / 3:
