@@ -52,12 +52,16 @@ async def maintenance():
         DBidB_str = await worksheet.col_values(7)
         DBidA_str.remove("id")
         DBidB_str.remove("id")
-        DBidA = [int(id) for id in DBidA_str]
-        DBidB = [int(id) for id in DBidB_str]
+        DBidA = [int(id) for id in DBidA_str if id]
+        DBidB = [int(id) for id in DBidB_str if id]
         DBnamesA = await worksheet.col_values(1)
         DBnamesB = await worksheet.col_values(5)
         DBnamesA.remove("A部門 参加者名 (display_name)")
         DBnamesB.remove("B部門 参加者名 (display_name)")
+        DBnamesA_filtered = filter(None, DBnamesA)
+        DBnamesB_filtered = filter(None, DBnamesB)
+        DBnamesA = list(DBnamesA_filtered)
+        DBnamesB = list(DBnamesB_filtered)
         member_name_A = [member.display_name for member in roleA.members]
         member_name_B = [member.display_name for member in roleB.members]
         # メンテその1 重複ロール付与
@@ -137,12 +141,16 @@ async def on_message(message):
         DBidB_str = await worksheet.col_values(7)
         DBidA_str.remove("id")
         DBidB_str.remove("id")
-        DBidA = [int(id) for id in DBidA_str]
-        DBidB = [int(id) for id in DBidB_str]
+        DBidA = [int(id) for id in DBidA_str if id]
+        DBidB = [int(id) for id in DBidB_str if id]
         DBnamesA = await worksheet.col_values(1)
         DBnamesB = await worksheet.col_values(5)
         DBnamesA.remove("A部門 参加者名 (display_name)")
         DBnamesB.remove("B部門 参加者名 (display_name)")
+        DBnamesA_filtered = filter(None, DBnamesA)
+        DBnamesB_filtered = filter(None, DBnamesB)
+        DBnamesA = list(DBnamesA_filtered)
+        DBnamesB = list(DBnamesB_filtered)
         member_name_A = [member.display_name for member in roleA.members]
         member_name_B = [member.display_name for member in roleB.members]
         # メンテその1 重複ロール付与
@@ -383,7 +391,7 @@ async def on_message(message):
             error_code += 1
         # オンの設定検出
         on_exist = False
-        for img, xy_list, file_name in zip(images, xy_lists, file_names):
+        for img, xy_list in zip(images, xy_lists):
             for xy in xy_list:
                 _, width = img.shape[:2]
                 if xy[0] < width * 2 / 3:
