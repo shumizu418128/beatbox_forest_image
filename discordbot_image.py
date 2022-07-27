@@ -126,6 +126,7 @@ async def on_message(message):
         return
 
     if message.content == "s.mt":
+        channel = client.get_channel(916608669221806100)  # ビト森杯 進行bot
         await message.channel.send("メンテナンス中...")
         gc = gspread_asyncio.AsyncioGspreadClientManager(get_credits)
         agc = await gc.authorize()
@@ -183,12 +184,12 @@ async def on_message(message):
             index = DBnamesA.index(name)
             member = message.guild.get_member(DBidA[index])
             await member.edit(nick=name)
-            await message.channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
+            await channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
         for name in set(DBnamesB) - set(member_name_B):
             index = DBnamesB.index(name)
             member = message.guild.get_member(DBidB[index])
             await member.edit(nick=name)
-            await message.channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
+            await channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
         if error == []:
             await message.channel.send("エラーなし")
             return
