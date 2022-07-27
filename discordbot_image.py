@@ -98,6 +98,7 @@ async def maintenance():
             index = DBnamesB.index(name)
             member = notice.guild.get_member(DBidB[index])
             await member.edit(nick=name)
+            await channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
         if error == []:
             await channel.send("定期メンテナンス: エラーなし")
             return
@@ -187,6 +188,7 @@ async def on_message(message):
             index = DBnamesB.index(name)
             member = message.guild.get_member(DBidB[index])
             await member.edit(nick=name)
+            await message.channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
         if error == []:
             await message.channel.send("エラーなし")
             return
