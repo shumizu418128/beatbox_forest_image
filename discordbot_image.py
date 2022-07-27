@@ -52,8 +52,8 @@ async def maintenance():
         DBidB_str = await worksheet.col_values(7)
         DBidA_str.remove("id")
         DBidB_str.remove("id")
-        DBidA = [int(id) for id in DBidA_str if id is not None]
-        DBidB = [int(id) for id in DBidB_str if id is not None]
+        DBidA = [int(id) for id in DBidA_str if id]
+        DBidB = [int(id) for id in DBidB_str if id]
         DBnamesA = await worksheet.col_values(1)
         DBnamesB = await worksheet.col_values(5)
         DBnamesA.remove("A部門 参加者名 (display_name)")
@@ -138,8 +138,8 @@ async def on_message(message):
         DBidB_str = await worksheet.col_values(7)
         DBidA_str.remove("id")
         DBidB_str.remove("id")
-        DBidA = [int(id) for id in DBidA_str if id is not None]
-        DBidB = [int(id) for id in DBidB_str if id is not None]
+        DBidA = [int(id) for id in DBidA_str if id]
+        DBidB = [int(id) for id in DBidB_str if id]
         DBnamesA = await worksheet.col_values(1)
         DBnamesB = await worksheet.col_values(5)
         DBnamesA.remove("A部門 参加者名 (display_name)")
