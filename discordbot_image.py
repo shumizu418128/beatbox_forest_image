@@ -92,8 +92,8 @@ async def maintenance():
         for name in set(DBnamesA) - set(member_name_A):
             index = DBnamesA.index(name)
             member = notice.guild.get_member(DBidA[index])
-            error.append(
-                f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidA[index]}")
+            await member.edit(nick=name)
+            await channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
         for name in set(DBnamesB) - set(member_name_B):
             index = DBnamesB.index(name)
             member = notice.guild.get_member(DBidB[index])
@@ -182,8 +182,8 @@ async def on_message(message):
         for name in set(DBnamesA) - set(member_name_A):
             index = DBnamesA.index(name)
             member = message.guild.get_member(DBidA[index])
-            error.append(
-                f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidA[index]}")
+            await member.edit(nick=name)
+            await message.channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
         for name in set(DBnamesB) - set(member_name_B):
             index = DBnamesB.index(name)
             member = message.guild.get_member(DBidB[index])
