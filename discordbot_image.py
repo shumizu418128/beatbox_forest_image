@@ -58,6 +58,10 @@ async def maintenance():
         DBnamesB = await worksheet.col_values(5)
         DBnamesA.remove("A部門 参加者名 (display_name)")
         DBnamesB.remove("B部門 参加者名 (display_name)")
+        DBnamesA_filtered = filter(None, DBnamesA)
+        DBnamesB_filtered = filter(None, DBnamesB)
+        DBnamesA = list(DBnamesA_filtered)
+        DBnamesB = list(DBnamesB_filtered)
         member_name_A = [member.display_name for member in roleA.members]
         member_name_B = [member.display_name for member in roleB.members]
         # メンテその1 重複ロール付与
@@ -144,6 +148,10 @@ async def on_message(message):
         DBnamesB = await worksheet.col_values(5)
         DBnamesA.remove("A部門 参加者名 (display_name)")
         DBnamesB.remove("B部門 参加者名 (display_name)")
+        DBnamesA_filtered = filter(None, DBnamesA)
+        DBnamesB_filtered = filter(None, DBnamesB)
+        DBnamesA = list(DBnamesA_filtered)
+        DBnamesB = list(DBnamesB_filtered)
         member_name_A = [member.display_name for member in roleA.members]
         member_name_B = [member.display_name for member in roleB.members]
         # メンテその1 重複ロール付与
