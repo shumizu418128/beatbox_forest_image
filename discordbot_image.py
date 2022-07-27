@@ -93,8 +93,7 @@ async def maintenance():
         for name in set(DBnamesB) - set(member_name_B):
             index = DBnamesB.index(name)
             member = notice.guild.get_member(DBidB[index])
-            error.append(
-                f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidB[index]}")
+            await member.edit(nick=name)
         if error == []:
             await channel.send("定期メンテナンス: エラーなし")
             return
@@ -179,8 +178,7 @@ async def on_message(message):
         for name in set(DBnamesB) - set(member_name_B):
             index = DBnamesB.index(name)
             member = message.guild.get_member(DBidB[index])
-            error.append(
-                f"・ニックネーム変更検知\nDB登録名: {name}\n現在の名前: {member.display_name}\nID: {DBidB[index]}")
+            await member.edit(nick=name)
         if error == []:
             await message.channel.send("エラーなし")
             return
