@@ -525,7 +525,7 @@ async def on_message(message):
                 files.append(discord.File(file_name))
         embed = Embed(
             title="分析結果", description=description, color=color)
-        embed.set_footer(text="made by tari3210#9924")
+        embed.set_footer(text="ビト森杯 - 画像分析bot 制作: tari3210#9924")
         value = "なし"
         if len(error_msg) > 0:
             error_msg = str(error_msg)[1:-1]
