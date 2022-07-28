@@ -268,7 +268,11 @@ async def on_message(message):
                         if bool(admin):
                             await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                             await message.author.add_roles(verified)
-                            await interaction.response.send_message(f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️")
+                            roleB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
+                            msg = f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️"
+                            if bool(roleB):
+                                msg += "\nB部門控室に入れるようになりました。"
+                            await interaction.response.send_message(msg)
 
                     async def button_reject_callback(interaction):
                         admin = interaction.user.get_role(
@@ -363,7 +367,11 @@ async def on_message(message):
                 if bool(admin):
                     await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                     await message.author.add_roles(verified)
-                    await interaction.response.send_message(f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️")
+                    roleB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
+                    msg = f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️"
+                    if bool(roleB):
+                        msg += "\nB部門控室に入れるようになりました。"
+                    await interaction.response.send_message(msg)
 
             async def button_reject_callback(interaction):
                 admin = interaction.user.get_role(
@@ -444,7 +452,11 @@ async def on_message(message):
                     if bool(admin):
                         await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                         await message.author.add_roles(verified)
-                        await interaction.response.send_message(f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️")
+                        roleB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
+                        msg = f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️"
+                        if bool(roleB):
+                            msg += "\nB部門控室に入れるようになりました。"
+                        await interaction.response.send_message(msg)
 
                 async def button_reject_callback(interaction):
                     admin = interaction.user.get_role(
@@ -501,6 +513,9 @@ async def on_message(message):
         if error_code == 0:
             color = 0x00ff00
             description = ":ok: \n\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️"
+            roleB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
+            if bool(roleB):
+                description += "\nB部門控室に入れるようになりました。"
             await message.author.add_roles(verified)
         else:
             color = 0xff0000
