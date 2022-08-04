@@ -215,6 +215,9 @@ async def on_message(message):
         overwrite = discord.PermissionOverwrite()
         overwrite.send_messages = False
         overwrite.view_channel = True
+        overwrite.send_messages_in_threads = False
+        overwrite.create_public_threads = False
+        overwrite.create_private_threads = False
         roleA = message.guild.get_role(920320926887862323)  # A部門 ビト森杯
         roleB = message.guild.get_role(920321241976541204)  # B部門 ビト森杯
         await message.channel.set_permissions(roleA, overwrite=overwrite)
