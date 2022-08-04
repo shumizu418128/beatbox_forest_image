@@ -200,6 +200,9 @@ async def on_message(message):
         return
 
     if len(message.attachments) != 2 and message.channel.id == 952946795573571654:  # 画像提出
+        admin = message.author.get_role(904368977092964352)  # ビト森杯運営
+        if bool(admin):
+            return
         await message.delete(delay=1)
         if len(message.attachments) == 0:
             await message.channel.send(f"お問い合わせは {contact.mention} までお願いします。", delete_after=5)
