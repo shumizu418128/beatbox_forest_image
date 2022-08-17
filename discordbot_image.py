@@ -233,6 +233,7 @@ async def on_message(message):
         dt_now = datetime.datetime.now(
             datetime.timezone(datetime.timedelta(hours=9)))
         date = dt_now.strftime('%H:%M:%S')
+        await message.delete()
         try:
             channel = await message.channel.create_thread(name=f"{date} {message.author.display_name} 分析ログ")
         except AttributeError:
@@ -240,7 +241,6 @@ async def on_message(message):
             await message.channel.set_permissions(roleB, overwrite=overwrite)
             await close_notice.delete()
             await message.channel.send("Error: ここに画像を送信しないでください。")
-            await message.delete()
             return
         await channel.send(f"{message.author.mention}\nご提出ありがとうございます。\n分析を行います。しばらくお待ちください。")
         tools = pyocr.get_available_tools()
@@ -251,9 +251,6 @@ async def on_message(message):
         error_msg = []
         error_code = 0
         # 下準備 保存、画像ファイル判定、縦横比判定
-        await channel.send(message.attachments[0].url)
-        await channel.send(message.attachments[1].url)
-        await message.delete()
         log = ""
         embed = Embed(title="分析中...")
         status = await channel.send(embed=embed)
@@ -300,6 +297,7 @@ async def on_message(message):
                 name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")
                 file_names.append(name)
                 await a.save(name)
+                await channel.send(file=discord.File(file_name))
                 log += f"{name.replace('/tmp/', '')}\n"
                 await sleep(1)
             else:
