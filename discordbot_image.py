@@ -229,7 +229,6 @@ async def on_message(message):
         bot_channel = client.get_channel(897784178958008322)  # bot用チャット
         admin = message.guild.get_role(904368977092964352)  # ビト森杯運営
         verified = message.guild.get_role(952951691047747655)  # verified
-        await message.delete()
         close_notice = await message.channel.send(f"一時的に提出受付をストップしています。\nしばらくお待ちください。\n\n※長時間続いている場合は、\nお手数ですが {contact.mention} まで\nご連絡ください。")
         dt_now = datetime.datetime.now(
             datetime.timezone(datetime.timedelta(hours=9)))
@@ -252,8 +251,9 @@ async def on_message(message):
         error_msg = []
         error_code = 0
         # 下準備 保存、画像ファイル判定、縦横比判定
-        await channel.send(message.attachments[0].proxy_url)
-        await channel.send(message.attachments[1].proxy_url)
+        await channel.send(message.attachments[0].url)
+        await channel.send(message.attachments[1].url)
+        await message.delete()
         log = ""
         embed = Embed(title="分析中...")
         status = await channel.send(embed=embed)
