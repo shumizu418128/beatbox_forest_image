@@ -297,7 +297,7 @@ async def on_message(message):
                 name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")
                 file_names.append(name)
                 await a.save(name)
-                await channel.send(file=discord.File(file_name))
+                await channel.send(file=discord.File(name))
                 log += f"{name.replace('/tmp/', '')}\n"
                 await sleep(1)
             else:
