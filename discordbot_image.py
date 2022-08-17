@@ -256,43 +256,6 @@ async def on_message(message):
         status = await channel.send(embed=embed)
         for a in message.attachments:
             if a.content_type == "image/jpeg" or a.content_type == "image/png":
-                if Decimal(f"{a.height}") / Decimal(f"{a.width}") < Decimal("1.6"):
-                    log += "縦横比1.6以上"
-                    embed = Embed(
-                        title="分析中止", description=f"作業ログ\n```\n{log}\n```")
-                    button = Button(
-                        label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
-                    button_reject = Button(
-                        label="問題あり", style=discord.ButtonStyle.red, emoji="❌")
-
-                    async def button_callback(interaction):
-                        admin = interaction.user.get_role(
-                            904368977092964352)  # ビト森杯運営
-                        if bool(admin):
-                            await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
-                            await message.author.add_roles(verified)
-                            roleB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
-                            msg = f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️\n検証: {interaction.user.display_name}"
-                            if bool(roleB):
-                                msg += "\n\nB部門控室に入れるようになりました。"
-                            await interaction.response.send_message(msg)
-
-                    async def button_reject_callback(interaction):
-                        admin = interaction.user.get_role(
-                            904368977092964352)  # ビト森杯運営
-                        if bool(admin):
-                            await interaction.response.send_message(f"{message.author.mention}\n確認の結果、問題が見つかりました。再提出をお願いします。\n検証: {interaction.user.display_name}\n\n`運営は問題内容をこのチャットに書いてください。`")
-                    button.callback = button_callback
-                    button_reject.callback = button_reject_callback
-                    view = View(timeout=None)
-                    view.add_item(button)
-                    view.add_item(button_reject)
-                    await status.edit(embed=embed)
-                    await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
-                    await message.channel.set_permissions(roleA, overwrite=overwrite)
-                    await message.channel.set_permissions(roleB, overwrite=overwrite)
-                    await close_notice.delete()
-                    return
                 dt_now = datetime.datetime.now()
                 name = "/tmp/" + dt_now.strftime("%H.%M.%S.png")
                 file_names.append(name)
@@ -302,6 +265,45 @@ async def on_message(message):
                 await sleep(1)
             else:
                 await channel.send(f"{message.author.mention}\nError: \n画像を認識できませんでした。\nJPG, JPEG, PNG画像を提出してください。")
+                await message.channel.set_permissions(roleA, overwrite=overwrite)
+                await message.channel.set_permissions(roleB, overwrite=overwrite)
+                await close_notice.delete()
+                return
+        for a in message.attachments:
+            if Decimal(f"{a.height}") / Decimal(f"{a.width}") < Decimal("1.6"):
+                log += "縦横比1.6以上"
+                embed = Embed(
+                    title="分析中止", description=f"作業ログ\n```\n{log}\n```")
+                button = Button(
+                    label="verify", style=discord.ButtonStyle.success, emoji="🎙️")
+                button_reject = Button(
+                    label="問題あり", style=discord.ButtonStyle.red, emoji="❌")
+
+                async def button_callback(interaction):
+                    admin = interaction.user.get_role(
+                        904368977092964352)  # ビト森杯運営
+                    if bool(admin):
+                        await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
+                        await message.author.add_roles(verified)
+                        roleB = message.author.get_role(
+                            920321241976541204)  # B部門 ビト森杯
+                        msg = f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️\n検証: {interaction.user.display_name}"
+                        if bool(roleB):
+                            msg += "\n\nB部門控室に入れるようになりました。"
+                        await interaction.response.send_message(msg)
+
+                async def button_reject_callback(interaction):
+                    admin = interaction.user.get_role(
+                        904368977092964352)  # ビト森杯運営
+                    if bool(admin):
+                        await interaction.response.send_message(f"{message.author.mention}\n確認の結果、問題が見つかりました。再提出をお願いします。\n検証: {interaction.user.display_name}\n\n`運営は問題内容をこのチャットに書いてください。`")
+                button.callback = button_callback
+                button_reject.callback = button_reject_callback
+                view = View(timeout=None)
+                view.add_item(button)
+                view.add_item(button_reject)
+                await status.edit(embed=embed)
+                await channel.send(f"{message.author.mention}\nbotでの画像分析ができない画像のため、運営による手動チェックに切り替えます。\nしばらくお待ちください。\n\n{admin.mention}", view=view)
                 await message.channel.set_permissions(roleA, overwrite=overwrite)
                 await message.channel.set_permissions(roleB, overwrite=overwrite)
                 await close_notice.delete()
@@ -371,7 +373,8 @@ async def on_message(message):
                 if bool(admin):
                     await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                     await message.author.add_roles(verified)
-                    roleB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
+                    roleB = message.author.get_role(
+                        920321241976541204)  # B部門 ビト森杯
                     msg = f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️\n検証: {interaction.user.display_name}"
                     if bool(roleB):
                         msg += "\n\nB部門控室に入れるようになりました。"
@@ -456,7 +459,8 @@ async def on_message(message):
                     if bool(admin):
                         await bot_channel.send(f"interaction verify: {interaction.user.display_name}\nID: {interaction.user.id}")
                         await message.author.add_roles(verified)
-                        roleB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
+                        roleB = message.author.get_role(
+                            920321241976541204)  # B部門 ビト森杯
                         msg = f"✅{message.author.mention} :ok:\n確認が終了しました。\n🙇‍♂️ご協力ありがとうございました！🙇‍♂️\n検証: {interaction.user.display_name}"
                         if bool(roleB):
                             msg += "\n\nB部門控室に入れるようになりました。"
