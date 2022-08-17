@@ -519,8 +519,8 @@ async def on_message(message):
         if error_code == 0:
             color = 0x00ff00
             description = ":ok: \n🙇‍♂️ご協力ありがとうございました！🙇‍♂️"
-            roleB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
-            if bool(roleB):
+            checkB = message.author.get_role(920321241976541204)  # B部門 ビト森杯
+            if bool(checkB):
                 description += "\n\nB部門控室に入れるようになりました。"
             await message.author.add_roles(verified)
         else:
