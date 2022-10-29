@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, time, timedelta, timezone
 from asyncio import sleep
 from decimal import Decimal
 
@@ -20,16 +20,18 @@ intents.typing = False  # typingを受け取らないように
 client = discord.Bot(intents=intents)
 print('ビト森杯bot - 画像分析: 起動完了')
 
-
+JST = timezone(timedelta(hours=9))
+AM8 = time(8, 0, tzinfo=JST)
 def get_credits():
     return ServiceAccountCredentials.from_json_keyfile_name(
         "makesomenoise-4243a19364b1.json",
         ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive',
          'https://www.googleapis.com/auth/spreadsheets'])
+red = 0xff0000
 
 
-@tasks.loop(hours=12)
+@tasks.loop(time=AM8)
 async def maintenance():
     dt_now = datetime.datetime.now(
         datetime.timezone(datetime.timedelta(hours=9)))
@@ -102,10 +104,10 @@ async def maintenance():
         if error == []:
             await channel.send("定期メンテナンス: エラーなし")
             return
-        await channel.send("<@412082841829113877>\n定期メンテナンス 見つかったエラー：")
+        embed = Embed(title="定期メンテナンス結果", color=red)
         for e in error:
-            await channel.send(e)
-        await channel.send("---finish---")
+            embed.description += e + "\n\n"
+        await channel.send("<@412082841829113877>", embed=embed)
     return
 
 
@@ -193,10 +195,10 @@ async def on_message(message):
         if error == []:
             await message.channel.send("エラーなし")
             return
-        await message.channel.send("<@412082841829113877>\n見つかったエラー：")
+        embed = Embed(title="メンテナンス結果", color=red)
         for e in error:
-            await message.channel.send(e)
-        await message.channel.send("---finish---")
+            embed.description += e + "\n\n"
+        await channel.send("<@412082841829113877>", embed=embed)
         return
 
     if len(message.attachments) != 2 and message.channel.id == 952946795573571654:  # 画像提出
