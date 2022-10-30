@@ -28,86 +28,83 @@ def get_credits():
         ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive',
          'https://www.googleapis.com/auth/spreadsheets'])
+
 red = 0xff0000
 
 
 @tasks.loop(time=AM8)
 async def maintenance():
-    dt_now = datetime.datetime.now(
-        datetime.timezone(datetime.timedelta(hours=9)))
-    date = dt_now.strftime('%H')
-    if int(date) <= 12:
-        channel = client.get_channel(916608669221806100)  # ビト森杯 進行bot
-        notice = await channel.send("定期メンテナンス中...")
-        gc = gspread_asyncio.AsyncioGspreadClientManager(get_credits)
-        agc = await gc.authorize()
-        workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
-        worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
-        error = []
-        roleA = notice.guild.get_role(920320926887862323)  # A部門 ビト森杯
-        roleB = notice.guild.get_role(920321241976541204)  # B部門 ビト森杯
-        memberA = set(roleA.members)
-        memberB = set(roleB.members)
-        mid_A = [member.id for member in roleA.members]
-        mid_B = [member.id for member in roleB.members]
-        DBidA_str = await worksheet.col_values(3)
-        DBidB_str = await worksheet.col_values(7)
-        DBidA_str.remove("id")
-        DBidB_str.remove("id")
-        DBidA = [int(id) for id in DBidA_str if id]
-        DBidB = [int(id) for id in DBidB_str if id]
-        DBnamesA = await worksheet.col_values(1)
-        DBnamesB = await worksheet.col_values(5)
-        DBnamesA.remove("A部門 参加者名 (display_name)")
-        DBnamesB.remove("B部門 参加者名 (display_name)")
-        DBnamesA_filtered = filter(None, DBnamesA)
-        DBnamesB_filtered = filter(None, DBnamesB)
-        DBnamesA = list(DBnamesA_filtered)
-        DBnamesB = list(DBnamesB_filtered)
-        member_name_A = [member.display_name for member in roleA.members]
-        member_name_B = [member.display_name for member in roleB.members]
-        # メンテその1 重複ロール付与
-        for member in memberA & memberB:
-            error.append(f"・重複ロール付与\n{member.display_name}\nID: {member.id}")
-        # メンテその2 ロール未付与
-        for id in set(DBidA) - set(mid_A):
-            member = notice.guild.get_member(id)
-            error.append(
-                f"・🇦部門 ロール未付与\n{member.display_name}\nID: {member.id}")
-        for id in set(DBidB) - set(mid_B):
-            member = notice.guild.get_member(id)
-            error.append(
-                f"・🅱️部門 ロール未付与\n{member.display_name}\nID: {member.id}")
-        # メンテその3 DB未登録
-        for id in set(mid_A) - set(DBidA):
-            member = notice.guild.get_member(id)
-            error.append(f"・🇦部門 DB未登録\n{member.display_name}\nID: {member.id}")
-        for id in set(mid_B) - set(DBidB):
-            member = notice.guild.get_member(id)
-            error.append(
-                f"・🅱️部門 DB未登録\n{member.display_name}\nID: {member.id}")
-        # メンテその4 DB AB重複
-        for id in set(DBidA) & set(DBidB):
-            member = notice.guild.get_member(id)
-            error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
-        # メンテその5 DB名前確認
-        for name in set(DBnamesA) - set(member_name_A):
-            index = DBnamesA.index(name)
-            member = notice.guild.get_member(DBidA[index])
-            await member.edit(nick=name)
-            await channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
-        for name in set(DBnamesB) - set(member_name_B):
-            index = DBnamesB.index(name)
-            member = notice.guild.get_member(DBidB[index])
-            await member.edit(nick=name)
-            await channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
-        if error == []:
-            await channel.send("定期メンテナンス: エラーなし")
-            return
-        embed = Embed(title="定期メンテナンス結果", color=red)
-        for e in error:
-            embed.description += e + "\n\n"
-        await channel.send("<@412082841829113877>", embed=embed)
+    channel = client.get_channel(916608669221806100)  # ビト森杯 進行bot
+    notice = await channel.send("定期メンテナンス中...")
+    gc = gspread_asyncio.AsyncioGspreadClientManager(get_credits)
+    agc = await gc.authorize()
+    workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
+    worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
+    error = []
+    roleA = notice.guild.get_role(920320926887862323)  # A部門 ビト森杯
+    roleB = notice.guild.get_role(920321241976541204)  # B部門 ビト森杯
+    memberA = set(roleA.members)
+    memberB = set(roleB.members)
+    mid_A = [member.id for member in roleA.members]
+    mid_B = [member.id for member in roleB.members]
+    DBidA_str = await worksheet.col_values(3)
+    DBidB_str = await worksheet.col_values(7)
+    DBidA_str.remove("id")
+    DBidB_str.remove("id")
+    DBidA = [int(id) for id in DBidA_str if id]
+    DBidB = [int(id) for id in DBidB_str if id]
+    DBnamesA = await worksheet.col_values(1)
+    DBnamesB = await worksheet.col_values(5)
+    DBnamesA.remove("A部門 参加者名 (display_name)")
+    DBnamesB.remove("B部門 参加者名 (display_name)")
+    DBnamesA_filtered = filter(None, DBnamesA)
+    DBnamesB_filtered = filter(None, DBnamesB)
+    DBnamesA = list(DBnamesA_filtered)
+    DBnamesB = list(DBnamesB_filtered)
+    member_name_A = [member.display_name for member in roleA.members]
+    member_name_B = [member.display_name for member in roleB.members]
+    # メンテその1 重複ロール付与
+    for member in memberA & memberB:
+        error.append(f"・重複ロール付与\n{member.display_name}\nID: {member.id}")
+    # メンテその2 ロール未付与
+    for id in set(DBidA) - set(mid_A):
+        member = notice.guild.get_member(id)
+        error.append(
+            f"・🇦部門 ロール未付与\n{member.display_name}\nID: {member.id}")
+    for id in set(DBidB) - set(mid_B):
+        member = notice.guild.get_member(id)
+        error.append(
+            f"・🅱️部門 ロール未付与\n{member.display_name}\nID: {member.id}")
+    # メンテその3 DB未登録
+    for id in set(mid_A) - set(DBidA):
+        member = notice.guild.get_member(id)
+        error.append(f"・🇦部門 DB未登録\n{member.display_name}\nID: {member.id}")
+    for id in set(mid_B) - set(DBidB):
+        member = notice.guild.get_member(id)
+        error.append(
+            f"・🅱️部門 DB未登録\n{member.display_name}\nID: {member.id}")
+    # メンテその4 DB AB重複
+    for id in set(DBidA) & set(DBidB):
+        member = notice.guild.get_member(id)
+        error.append(f"・DB AB重複\n{member.display_name}\nID: {member.id}")
+    # メンテその5 DB名前確認
+    for name in set(DBnamesA) - set(member_name_A):
+        index = DBnamesA.index(name)
+        member = notice.guild.get_member(DBidA[index])
+        await member.edit(nick=name)
+        await channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
+    for name in set(DBnamesB) - set(member_name_B):
+        index = DBnamesB.index(name)
+        member = notice.guild.get_member(DBidB[index])
+        await member.edit(nick=name)
+        await channel.send(f"{member.mention}\nエントリー後のニックネーム変更は禁止されています\nchanging nickname after entry is prohibited")
+    if error == []:
+        await channel.send("定期メンテナンス: エラーなし")
+        return
+    embed = Embed(title="定期メンテナンス結果", color=red)
+    for e in error:
+        embed.description += e + "\n\n"
+    await channel.send("<@412082841829113877>", embed=embed)
     return
 
 
