@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.11
 USER root
 
 ENV LANG ja_JP.UTF-8
