@@ -22,12 +22,15 @@ print('ビト森杯bot - 画像分析: 起動完了')
 
 JST = timezone(timedelta(hours=9))
 AM8 = time(8, 0, tzinfo=JST)
+
+
 def get_credits():
     return ServiceAccountCredentials.from_json_keyfile_name(
         "makesomenoise-4243a19364b1.json",
         ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive',
          'https://www.googleapis.com/auth/spreadsheets'])
+
 
 red = 0xff0000
 
@@ -39,7 +42,7 @@ async def maintenance():
     gc = gspread_asyncio.AsyncioGspreadClientManager(get_credits)
     agc = await gc.authorize()
     workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
-    worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
+    worksheet = await workbook.worksheet('botデータベース（参加者）')
     error = []
     roleA = notice.guild.get_role(920320926887862323)  # A部門 ビト森杯
     roleB = notice.guild.get_role(920321241976541204)  # B部門 ビト森杯
@@ -130,7 +133,7 @@ async def on_message(message):
         gc = gspread_asyncio.AsyncioGspreadClientManager(get_credits)
         agc = await gc.authorize()
         workbook = await agc.open_by_key('1WcwdGVf7NRKerM1pnZu9kIsgA0VYy5TddyGdKHBzAu4')
-        worksheet = await workbook.worksheet('botデータベース（さわらないでね）')
+        worksheet = await workbook.worksheet('botデータベース（参加者）')
         error = []
         roleA = message.guild.get_role(920320926887862323)  # A部門 ビト森杯
         roleB = message.guild.get_role(920321241976541204)  # B部門 ビト森杯
