@@ -18,7 +18,7 @@ from scipy.spatial import distance
 intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
 intents.typing = False  # typingを受け取らないように
 client = discord.Bot(intents=intents)
-print('ビト森杯bot - 画像分析: 起動完了')
+print(f'ビト森杯bot - 画像分析: {discord.__version__}')
 
 JST = timezone(timedelta(hours=9))
 AM8 = time(8, 0, tzinfo=JST)
