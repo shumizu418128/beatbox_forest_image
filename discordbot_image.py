@@ -124,7 +124,7 @@ async def on_message(message):
         return
 
     if message.content == "s.test":
-        await message.channel.send(f"{str(client.user)}\n{client.user.locale}\n{discord.__version__}")
+        await message.channel.send(f"{str(client.user)}\n{discord.__version__}")
         return
 
     if message.content == "s.mt":
