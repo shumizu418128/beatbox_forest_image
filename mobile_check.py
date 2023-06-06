@@ -43,14 +43,12 @@ async def sensitive_check(file_names: list[str], error_msg: list[str]):  # 感�
             sensitive_exist = True
             if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
                 sensitive_high = False
-                contours, _ = cv2.findContours(
-                    frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
+                contours, _ = cv2.findContours(frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
                 xy_sensitive = []
                 for c in contours:
                     result = cv2.moments(c)
                     try:
-                        x, y = int(
-                            result["m10"] / result["m00"] * 2 / 3), int(result["m01"] / result["m00"])
+                        x, y = int(result["m10"] / result["m00"] * 2 / 3), int(result["m01"] / result["m00"])
                     except ZeroDivisionError:
                         continue
                     xy_sensitive.append([x, y])
@@ -87,7 +85,7 @@ async def text_check(file_names: list[str]):  # 各種設定項目チェック
             if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
                 text_position = text.position
                 center_text = [int((text_position[0][0] + text_position[1][0]) / 2),
-                              int((text_position[0][1] + text_position[1][1]) / 2)]
+                               int((text_position[0][1] + text_position[1][1]) / 2)]
                 mobile_voice_overlay.append(center_text)
     return [all_text, mobile_voice_overlay]
 
@@ -178,15 +176,13 @@ async def setting_off_check(file_name: str):  # 設定オン座標検出
     lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
     upper = np.array([123, 172, 252])
     frame_mask = cv2.inRange(hsv, lower, upper)
-    contours, _ = cv2.findContours(
-        frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
+    contours, _ = cv2.findContours(frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
     for c in contours:
-        result = cv2.moments(c)
-        try:
+        area = cv2.contourArea(c, False)
+        if area > 4:
+            result = cv2.moments(c)
             x, y = int(result["m10"] / result["m00"]), int(result["m01"] / result["m00"])
-        except ZeroDivisionError:
-            continue
-        coordinate_list.append([x, y])
+            coordinate_list.append([x, y])
     return coordinate_list
 
 
@@ -198,7 +194,7 @@ async def circle_write(file_name: str, coordinate_list: list, error_msg: list[st
     # 設定がオンの部分に赤丸を書き込む
     for xy in coordinate_list:
         _, width = cv2_image.shape[:2]
-        if xy[0] < width * 2 / 3:
+        if xy[0] < width * 2 / 3:  # 左側にあるやつは無視
             continue
         cv2.circle(cv2_image, (xy), 65, (0, 0, 255), 20)
         on_exist = True
