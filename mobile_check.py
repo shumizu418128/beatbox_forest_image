@@ -119,6 +119,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str]):
             continue
         bottom_right = [top_left[0] + 60, top_left[1] + 60]
         center_check_mark = [top_left[0] + 30, top_left[1] + 30]
+        noise_suppression.append(center_check_mark)
 
         # 「設定しない」の位置チェック
         text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
