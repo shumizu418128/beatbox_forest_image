@@ -61,7 +61,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
                 # 感度設定に関してはここで書き出しを行う
                 cv2.circle(image_crop, (75, closest_xy[1]), 65, (0, 0, 255), 20)  # x = 75にして常に最高感度を要求
                 cv2.imwrite(file_name, image_crop)
-                log += "感度座標: " + ", ".join(closest_xy) + "\n"
+                log += "感度座標: " + str(closest_xy) + "\n"
     if sensitive_exist is False:
         error_msg.append("* 感度設定が映るようにしてください。一部端末では「マイクのテスト」ボタンを押すと表示されます。")
     if sensitive_high is False:
@@ -88,7 +88,7 @@ async def text_check(file_names: list[str], log: str):  # 各種設定項目チ�
                 center_text = [int((text_position[0][0] + text_position[1][0]) / 2),
                                int((text_position[0][1] + text_position[1][1]) / 2)]
                 mobile_voice_overlay.append(center_text)
-                log += "オーバーレイ座標: " + ", ".join(center_text) + "\n"
+                log += "オーバーレイ座標: " + str(center_text) + "\n"
     return [all_text, mobile_voice_overlay, log]
 
 
@@ -188,8 +188,8 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
             result = cv2.moments(c)
             x, y = int(result["m10"] / result["m00"]), int(result["m01"] / result["m00"])
             coordinate_list.append([x, y])
-    log += ", ".join(coordinate_list) + "\n"
-    return coordinate_list
+    log += "設定オン座標: " + str(coordinate_list) + "\n"
+    return [coordinate_list, log]
 
 
 async def circle_write(file_name: str, coordinate_list: list, error_msg: list[str]):  # 赤丸書き込み
@@ -218,13 +218,13 @@ async def mobile_check(file_names: list[str]):
     log = ""
 
     # 感度設定
-    error_msg = await sensitive_check(file_names, error_msg, log)
+    error_msg, log = await sensitive_check(file_names, error_msg, log)
 
     # モバイルボイスオーバーレイ の座標検出
-    all_text, mobile_voice_overlay = await text_check(file_names, log)
+    all_text, mobile_voice_overlay, log = await text_check(file_names, log)
 
     # ノイズ抑制チェックマーク座標
-    error_msg, noise_suppression = await noise_suppression_check(file_names, error_msg, log)
+    error_msg, noise_suppression, log = await noise_suppression_check(file_names, error_msg, log)
 
     # 必要な設定項目があるか
     error_msg = await word_contain_check(all_text, error_msg)
@@ -235,7 +235,7 @@ async def mobile_check(file_names: list[str]):
             return "not_japanese"
 
         # 設定オン座標検出
-        circle_coordinate = await setting_off_check(file_name, log)
+        circle_coordinate, log = await setting_off_check(file_name, log)
 
         # モバイルボイスオーバーレイ、チェックマーク引き算
         for setting_on in circle_coordinate:
