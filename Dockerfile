@@ -23,8 +23,7 @@ RUN pip install git+https://github.com/Rapptz/discord.py \
     pip install numpy \
     pip install pyocr \
     pip install opencv-python--headless \
-    pip install scipy \
-    pip install oauth2client
+    pip install scipy
 COPY discordbot_image.py discordbot_image.py
 COPY mobile_check.py mobile_check.py
 COPY analyze.py analyze.py
