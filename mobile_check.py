@@ -143,7 +143,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str], l
 
             # 正しい場所
             correct_place = [center_check_mark[0], center_text[1]]
-            cv2.circle(cv2_image, correct_place, 20, (0, 0, 255), 2)
+            cv2.circle(cv2_image, correct_place, 65, (0, 0, 255), 2)
             cv2.imwrite(file_name, cv2_image)
             error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸のところをタップして「設定しない」に変更してください。')
 
@@ -242,7 +242,7 @@ async def mobile_check(file_names: list[str]):
                 if distance.euclidean(setting_on, overlay) < 200:
                     circle_coordinate.remove(setting_on)
             for noise in noise_suppression:
-                if distance.euclidean(setting_on, noise) < 20:
+                if distance.euclidean(setting_on, noise) < 60:
                     circle_coordinate.remove(setting_on)
 
         # 赤丸書き出し
