@@ -1,7 +1,7 @@
 import os
 
 import discord
-from discord import Client
+from discord import Client, Interaction
 from analyze import analyze
 
 TOKEN = os.environ['DISCORD_BOT_TOKEN']
@@ -33,5 +33,15 @@ async def on_message(message):
 
     if len(message.attachments) == 2 and message.channel.id == 897784178958008322:  # 画像提出
         await analyze(message)
+
+
+@client.event
+async def on_interaction(interaction: Interaction):
+    if interaction.custom_id == "button_support":
+        await interaction.response.defer(ephemeral=True, thinking=False)
+        bot_channel = interaction.guild.get_channel(897784178958008322)  # bot用チャット
+        tari3210 = interaction.guild.get_member(412082841829113877)
+        await bot_channel.send(f"{tari3210.mention}\nエラー報告\n\n{interaction.channel.jump_url}")
+        await interaction.followup.send(f"{interaction.user.mention}\n運営メンバーに通知を送信しました。まもなく対応しますので、しばらくお待ちください。")
 
 client.run(TOKEN)
