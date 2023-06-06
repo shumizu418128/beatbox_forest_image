@@ -1,13 +1,13 @@
 import os
 
 import discord
-
+from discord import Client
 from analyze import analyze
 
 TOKEN = os.environ['DISCORD_BOT_TOKEN']
 intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
 intents.typing = False  # typingを受け取らないように
-client = discord.Bot(intents=intents)
+client = Client(intents=intents)
 print(f'画像分析: {discord.__version__}')
 
 
