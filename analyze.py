@@ -68,17 +68,8 @@ async def analyze(message: discord.Message):
     await channel.send(message.author.mention, embed=embed, files=[File(file_name) for file_name in file_names])
 
     # 報告ボタン
-    button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red)
-
-    async def button_callback(interaction: Interaction):
-        await interaction.response.defer(ephemeral=True, thinking=False)
-        bot_channel = interaction.guild.get_channel(897784178958008322)  # bot用チャット
-        tari3210 = interaction.guild.get_member(412082841829113877)
-        await bot_channel.send(f"{tari3210.mention}\nエラー報告\n\n{interaction.channel.jump_url}")
-        await interaction.followup.send(f"{interaction.user.mention}\n運営メンバーに通知を送信しました。まもなく対応しますので、しばらくお待ちください。")
-
-    button.callback = button_callback
+    button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red, custom_id="button_support")
     view = View()
     view.add_item(button)
-    await channel.send("このbotはまだ開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。\n\n* botのエラーログの内容に誤りがある・内容がよく分からない\n* botが変な動作をしている", view=view)
+    await channel.send("このbotは開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。\n\n* botのエラーログの内容に誤りがある・内容がよく分からない\n* botが変な動作をしている", view=view)
     return
