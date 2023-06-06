@@ -17,11 +17,14 @@ async def analyze(message: discord.Message):
     thread_names = [thread.name for thread in threads]
     if str(message.author.id) not in thread_names:
         try:
-            channel = await message.channel.create_thread(name=f"{message.author.display_name}")
+            channel = await message.channel.create_thread(name=f"{message.author.id}")
         except AttributeError:  # スレッド作成失敗 -> 送信チャンネルがスレッド
             if len(message.attachments) != 2:
                 return
             channel = message.channel
+    else:
+        index = thread_names.index(str(message.author.id))
+        channel = threads[index]
     await channel.send(f"{message.author.mention}\nご提出ありがとうございます。\n分析を行います。しばらくお待ちください。")
     if bool(message.content):
         await channel.send("※画像と一緒に送信されたメッセージ文は削除されました。")
