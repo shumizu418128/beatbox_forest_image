@@ -9,7 +9,7 @@ from PIL import Image
 from scipy.spatial import distance
 
 
-async def sensitive_check(file_names: list[str], error_msg: list[str]):  # 感度設定
+async def sensitive_check(file_names: list[str], error_msg: list[str], log: str):  # 感度設定
     # 初期設定
     sensitive_exist = False
     sensitive_high = True
@@ -61,14 +61,15 @@ async def sensitive_check(file_names: list[str], error_msg: list[str]):  # 感�
                 # 感度設定に関してはここで書き出しを行う
                 cv2.circle(image_crop, (75, closest_xy[1]), 65, (0, 0, 255), 20)  # x = 75にして常に最高感度を要求
                 cv2.imwrite(file_name, image_crop)
+                log += "感度座標: " + ", ".join(closest_xy) + "\n"
     if sensitive_exist is False:
         error_msg.append("* 感度設定が映るようにしてください。一部端末では「マイクのテスト」ボタンを押すと表示されます。")
     if sensitive_high is False:
         error_msg.append("* 設定感度が低すぎます。赤丸のところまで感度を上げてください。")
-    return error_msg
+    return [error_msg, log]
 
 
-async def text_check(file_names: list[str]):  # 各種設定項目チェック
+async def text_check(file_names: list[str], log: str):  # 各種設定項目チェック
     # 初期設定
     tools = pyocr.get_available_tools()
     tool = tools[0]
@@ -87,17 +88,18 @@ async def text_check(file_names: list[str]):  # 各種設定項目チェック
                 center_text = [int((text_position[0][0] + text_position[1][0]) / 2),
                                int((text_position[0][1] + text_position[1][1]) / 2)]
                 mobile_voice_overlay.append(center_text)
-    return [all_text, mobile_voice_overlay]
+                log += "オーバーレイ座標: " + ", ".join(center_text) + "\n"
+    return [all_text, mobile_voice_overlay, log]
 
 
-async def noise_suppression_check(file_names: list[str], error_msg: list[str]):
+async def noise_suppression_check(file_names: list[str], error_msg: list[str], log: str):
     # 初期設定
     tools = pyocr.get_available_tools()
     tool = tools[0]
     lang = "jpn"
 
     noise_suppression = []  # noise_suppressionは保存
-    for file_name in file_names:
+    for i, file_name in enumerate(file_names):
         center_text = []  # center_textは毎回クリア
         PIL_image = Image.open(file_name)
         cv2_image = cv2.imread(file_name)
@@ -115,6 +117,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str]):
         # テンプレートマッチング
         result = cv2.matchTemplate(cv2_image, template, cv2.TM_CCOEFF_NORMED)
         _, precision, _, top_left = cv2.minMaxLoc(result)  # precision = 精度
+        log += f"MT精度{i + 1}: {precision}" + "\n"
         if precision < 0.7:  # 精度7割未満は検知失敗
             continue
         bottom_right = [top_left[0] + 60, top_left[1] + 60]
@@ -132,6 +135,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str]):
         if bool(center_text):  # 「設定しない」があるとき
             # チェックマーク &「設定しない」の、y座標の距離
             distance_y = abs(center_check_mark[1] - center_text[1])
+            log += f"y座標距離{i + 1}: {distance_y}" + "\n"
 
         if distance_y > 20 or bool(center_text) is False:  # 理論上は距離0 このifに引っかかる = ノイキャン設定不適切
             # チェックマークに斜線
@@ -144,7 +148,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str]):
 
     if bool(noise_suppression) is False:  # 中身が空なら失敗
         error_msg.append('* ノイズ抑制設定のチェックマーク検出に失敗しました。')
-    return [error_msg, noise_suppression]
+    return [error_msg, noise_suppression, log]
 
 
 async def word_contain_check(all_text: str, error_msg: list[str]):  # 必要事項があるかチェック
@@ -167,7 +171,7 @@ async def word_contain_check(all_text: str, error_msg: list[str]):  # 必要事�
     return error_msg
 
 
-async def setting_off_check(file_name: str):  # 設定オン座標検出
+async def setting_off_check(file_name: str, log: str):  # 設定オン座標検出
     # 初期設定
     coordinate_list = []
     cv2_image = cv2.imread(file_name)
@@ -184,6 +188,7 @@ async def setting_off_check(file_name: str):  # 設定オン座標検出
             result = cv2.moments(c)
             x, y = int(result["m10"] / result["m00"]), int(result["m01"] / result["m00"])
             coordinate_list.append([x, y])
+    log += ", ".join(coordinate_list) + "\n"
     return coordinate_list
 
 
@@ -210,15 +215,16 @@ async def circle_write(file_name: str, coordinate_list: list, error_msg: list[st
 async def mobile_check(file_names: list[str]):
     # 初期設定
     error_msg = []
+    log = ""
 
     # 感度設定
-    error_msg = await sensitive_check(file_names, error_msg)
+    error_msg = await sensitive_check(file_names, error_msg, log)
 
     # モバイルボイスオーバーレイ の座標検出
-    all_text, mobile_voice_overlay = await text_check(file_names)
+    all_text, mobile_voice_overlay = await text_check(file_names, log)
 
     # ノイズ抑制チェックマーク座標
-    error_msg, noise_suppression = await noise_suppression_check(file_names, error_msg)
+    error_msg, noise_suppression = await noise_suppression_check(file_names, error_msg, log)
 
     # 必要な設定項目があるか
     error_msg = await word_contain_check(all_text, error_msg)
@@ -229,7 +235,7 @@ async def mobile_check(file_names: list[str]):
             return "not_japanese"
 
         # 設定オン座標検出
-        circle_coordinate = await setting_off_check(file_name)
+        circle_coordinate = await setting_off_check(file_name, log)
 
         # モバイルボイスオーバーレイ、チェックマーク引き算
         for setting_on in circle_coordinate:
@@ -243,4 +249,4 @@ async def mobile_check(file_names: list[str]):
         # 赤丸書き出し
         error_msg = await circle_write(file_name, circle_coordinate, error_msg)
 
-    return error_msg
+    return [error_msg, log]
