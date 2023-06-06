@@ -6,6 +6,7 @@ ENV LANGUAGE ja_JP:ja
 ENV LC_ALL ja_JP.UTF-8
 ENV TZ JST-9
 ENV TERM xterm
+RUN /usr/local/bin/python -m pip install --upgrade pip
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y \
@@ -24,7 +25,6 @@ RUN pip install git+https://github.com/Rapptz/discord.py \
     pip install opencv-python--headless \
     pip install scipy \
     pip install oauth2client
-RUN /usr/local/bin/python -m pip install --upgrade pip
 COPY discordbot_image.py discordbot_image.py
 COPY mobile_check.py mobile_check.py
 COPY analyze.py analyze.py
