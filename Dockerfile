@@ -26,6 +26,8 @@ RUN pip install git+https://github.com/Rapptz/discord.py \
     pip install oauth2client
 RUN /usr/local/bin/python -m pip install --upgrade pip
 COPY discordbot_image.py discordbot_image.py
+COPY mobile_check.py mobile_check.py
+COPY analyze.py analyze.py
 COPY makesomenoise-4243a19364b1.json makesomenoise-4243a19364b1.json
 COPY eng.traineddata eng.traineddata
 COPY jpn.traineddata jpn.traineddata
