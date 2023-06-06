@@ -2,7 +2,7 @@ from asyncio import sleep
 from datetime import datetime
 
 import discord
-from discord import ButtonStyle, Embed, File, Interaction
+from discord import ButtonStyle, Embed, File
 from discord.ui import Button, View
 
 import mobile_check
