@@ -199,7 +199,7 @@ async def circle_write(file_name: str, coordinate_list: list, error_msg: list[st
             continue
         cv2.circle(cv2_image, (xy), 65, (0, 0, 255), 20)
         on_exist = True
-    if on_exist:
+    if on_exist and "* 赤丸で囲われた設定をOFFにしてください。" not in error_msg:
         error_msg.append("* 赤丸で囲われた設定をOFFにしてください。")
 
     # 書き出し
