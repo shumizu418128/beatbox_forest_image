@@ -19,6 +19,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
         image = cv2.imread(file_name)
         height, width = image.shape[:2]  # height -> Y座標  width -> X座標
         image_crop = image[int(height / 10): height, 0: width]  # y, x    ここで上10%カット
+        cv2.imwrite(file_name, image_crop)
         all_pixel = str(width * height)
         center = [width / 3, height / 3]  # 3で割っているのは、感度設定の座標を検出するため
 
