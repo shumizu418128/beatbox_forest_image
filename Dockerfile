@@ -15,7 +15,7 @@ RUN apt-get update \
     libtesseract-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-RUN pip install git+https://github.com/Pycord-Development/pycord \
+RUN pip install git+https://github.com/Rapptz/discord.py \
     pip install pynacl \
     pip install asyncio \
     pip install Pillow \
@@ -23,7 +23,6 @@ RUN pip install git+https://github.com/Pycord-Development/pycord \
     pip install pyocr \
     pip install opencv-python--headless \
     pip install scipy \
-    pip install gspread_asyncio \
     pip install oauth2client
 RUN /usr/local/bin/python -m pip install --upgrade pip
 COPY discordbot_image.py discordbot_image.py
