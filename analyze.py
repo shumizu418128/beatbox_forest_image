@@ -54,7 +54,9 @@ async def analyze(message: discord.Message):
     if result == "not_japanese":
         await channel.send(f"{message.author.mention}\nError: 外国語版Discordの画像分析は対応していません。")
 
-    error_msg = result
+    embed = Embed(title="分析ログ", description=result[1])
+    await channel.send(embed=embed)
+    error_msg = result[0]
 
     # 結果通知
     tari3210 = message.guild.get_member(412082841829113877)
