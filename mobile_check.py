@@ -144,6 +144,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str], l
             # 正しい場所
             correct_place = [center_check_mark[0], center_text[1]]
             cv2.circle(cv2_image, correct_place, 20, (0, 0, 255), 2)
+            cv2.imwrite(file_name, cv2_image)
             error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸のところをタップして「設定しない」に変更してください。')
 
     if bool(noise_suppression) is False:  # 中身が空なら失敗
@@ -206,8 +207,6 @@ async def circle_write(file_name: str, coordinate_list: list, error_msg: list[st
         on_exist = True
     if on_exist and "* 赤丸で囲われた設定をOFFにしてください。" not in error_msg:
         error_msg.append("* 赤丸で囲われた設定をOFFにしてください。")
-
-    # 書き出し
     cv2.imwrite(file_name, cv2_image)
     return error_msg
 
