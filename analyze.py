@@ -61,17 +61,17 @@ async def analyze(message: discord.Message):
     # 結果通知
     tari3210 = message.guild.get_member(412082841829113877)
     embed = Embed(title="分析結果", description=":ok:\n問題なし", color=0x00ff00)
-    embed.set_footer(text=f"画像分析bot 制作: {str(tari3210)}")
+    embed.set_footer(text=f"画像分析bot 制作: {str(tari3210)}", icon_url=tari3210.avatar.url)
     if len(error_msg) > 0:
         embed.color = 0xff0000
         embed.description = ":x: \n以下の問題が見つかりました。\n\n-------------"
         value = '\n'.join(error_msg)
-        embed.add_field(name="エラーログ", value=value, inline=False)
+        embed.add_field(name="エラー内容", value=value, inline=False)
     await channel.send(message.author.mention, embed=embed, files=[File(file_name) for file_name in file_names])
 
     # 報告ボタン
     button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red, custom_id="button_support")
     view = View()
     view.add_item(button)
-    await channel.send("このbotは開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。\n\n* botのエラーログの内容に誤りがある・内容がよく分からない\n* botが変な動作をしている", view=view)
+    await channel.send("このbotは開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。\n\n* エラー内容に誤りがある・エラー内容がよくわからない\n* botが変な動作をしている", view=view)
     return
