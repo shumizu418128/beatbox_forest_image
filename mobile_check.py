@@ -187,6 +187,9 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
         if area > 50:  # 面積50以上で設定オンとみなす
             result = cv2.moments(c)
             x, y = int(result["m10"] / result["m00"]), int(result["m01"] / result["m00"])
+            _, width = cv2_image.shape[:2]
+            if x < width * 2 / 3:  # 左側にあるやつは無視
+                continue
             coordinate_list.append([x, y])
     log += "設定オン座標: " + str(coordinate_list) + "\n"
     return [coordinate_list, log]
@@ -194,17 +197,12 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
 
 async def circle_write(file_name: str, coordinate_list: list, error_msg: list[str]):  # 赤丸書き込み
     # 初期設定
-    on_exist = False
     cv2_image = cv2.imread(file_name)
 
     # 設定がオンの部分に赤丸を書き込む
     for xy in coordinate_list:
-        _, width = cv2_image.shape[:2]
-        if xy[0] < width * 2 / 3:  # 左側にあるやつは無視
-            continue
         cv2.circle(cv2_image, (xy), 65, (0, 0, 255), 20)
-        on_exist = True
-    if on_exist and "* 赤丸で囲われた設定をOFFにしてください。" not in error_msg:
-        error_msg.append("* 赤丸で囲われた設定をOFFにしてください。")
+        if "* 赤丸で囲われた設定をOFFにしてください。" not in error_msg:
+            error_msg.append("* 赤丸で囲われた設定をOFFにしてください。")
     cv2.imwrite(file_name, cv2_image)
     return error_msg
