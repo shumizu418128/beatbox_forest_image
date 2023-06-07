@@ -94,9 +94,8 @@ async def analyze(message: discord.Message):
         # モバイルボイスオーバーレイ リスト分割
         index = mobile_voice_overlay.index("split")
         split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index + 1: -1]]
-        log += "オーバーレイリスト: " + str(split_overlay) + "\n"
 
-        for overlay_list, file_name in zip(split_overlay, file_names):
+        for i, (overlay_list, file_name) in enumerate(zip(split_overlay, file_names)):
             # 設定オン座標検出
             circle_coordinate, log = await mobile_check.setting_off_check(file_name, log)
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
@@ -104,10 +103,15 @@ async def analyze(message: discord.Message):
 
             # モバイルボイスオーバーレイ引き算
             for setting_on in circle_coordinate:
-                if bool(overlay_list):
-                    for overlay_coordinate in overlay_list:
-                        log += f"オーバーレイ距離: {distance.euclidean(setting_on, overlay_coordinate)}\n"
-                        if distance.euclidean(setting_on, overlay_coordinate) < 150:
+                if bool(overlay_list):  # 中身ないときがある
+                    log += f"オーバーレイリスト{i + 1}: " + str(overlay_list) + "\n"
+
+                    for overlay in overlay_list:
+                        # オーバーレイと設定オンの距離を計算
+                        overlay_distance = distance.euclidean(setting_on, overlay)
+                        log += "オーバーレイ距離: " + "{:.1f}".format(overlay_distance) + "\n"
+
+                        if overlay_distance < 150:  # 150未満ならモバイルボイスオーバーレイ設定オン 無視する
                             circle_coordinate.remove(setting_on)
 
             # 赤丸書き出し
