@@ -93,8 +93,8 @@ async def analyze(message: discord.Message):
 
         # モバイルボイスオーバーレイ リスト分割
         index = mobile_voice_overlay.index("split")
-        split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index: -1].remove("split")]
-        log += "オーバーレイリスト: " + str(split_overlay) + "\n" + str(mobile_voice_overlay) + "\n"
+        split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index + 1: -1]]
+        log += "オーバーレイリスト: " + str(split_overlay) + "\n"
 
         for overlay_list, file_name in zip(split_overlay, file_names):
             # 設定オン座標検出
