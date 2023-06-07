@@ -36,7 +36,7 @@ async def on_message(message: Message):
             await message.channel.send("画像1枚では、すべての設定項目が画像内に収まりません。", delete_after=5)
         return
 
-    if len(message.attachments) == 2 and channel_id == [1115986804026392627, 897784178958008322]:  # マイクチェックチャンネル bot用チャット
+    if len(message.attachments) == 2 and channel_id in [1115986804026392627, 897784178958008322]:  # マイクチェックチャンネル bot用チャット
         await analyze(message)
 
 
