@@ -1,9 +1,11 @@
+import re
 from asyncio import sleep
 from datetime import datetime
 
 import discord
 from discord import ButtonStyle, Embed, File
 from discord.ui import Button, View
+from scipy.spatial import distance
 
 import mobile_check
 
@@ -48,15 +50,40 @@ async def analyze(message: discord.Message):
         await channel.send(f"{message.author.mention}\nError: PC版Discordの画像と判定されました。\nPC版Discordの画像分析は、近日対応予定です。")
         return
 
-    # 以下モバイル版
-    # result: error_msg(list) もしくは エラー文
-    result = await mobile_check.mobile_check(file_names)
-    if result == "not_japanese":
-        await channel.send(f"{message.author.mention}\nError: 外国語版Discordの画像分析は対応していません。")
+    # モバイル版
+    else:
+        # 初期設定
+        error_msg = []
+        log = ""
 
-    embed = Embed(title="分析ログ", description=result[1])
-    await channel.send(embed=embed)
-    error_msg = result[0]
+        # 感度設定
+        error_msg, log = await mobile_check.sensitive_check(file_names, error_msg, log)
+
+        # モバイルボイスオーバーレイ の座標検出
+        all_text, mobile_voice_overlay, log = await mobile_check.text_check(file_names, log)
+
+        # ノイズ抑制チェックマーク座標
+        error_msg, noise_suppression, log = await mobile_check.noise_suppression_check(file_names, error_msg, log)
+
+        # 必要な設定項目があるか
+        error_msg = await mobile_check.word_contain_check(all_text, error_msg)
+
+        for file_name in file_names:
+            # 外国語検出（ひらがな・カタカナが無い場合ストップ）
+            if not re.search(r'[ぁ-ん]+|[ァ-ヴー]+', all_text):
+                return "not_japanese"
+
+            # 設定オン座標検出
+            circle_coordinate, log = await mobile_check.setting_off_check(file_name, log)
+
+            # モバイルボイスオーバーレイ、チェックマーク引き算
+            for setting_on in circle_coordinate:
+                for overlay in mobile_voice_overlay:
+                    if distance.euclidean(setting_on, overlay) < 200:
+                        circle_coordinate.remove(setting_on)
+
+            # 赤丸書き出し
+            error_msg = await mobile_check.circle_write(file_name, circle_coordinate, error_msg)
 
     # 結果通知
     tari3210 = message.guild.get_member(412082841829113877)
