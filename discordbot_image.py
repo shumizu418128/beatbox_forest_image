@@ -1,7 +1,7 @@
 import os
 
 import discord
-from discord import Client, Interaction
+from discord import Client, Interaction, Message
 from analyze import analyze
 
 TOKEN = os.environ['DISCORD_BOT_TOKEN']
@@ -12,8 +12,7 @@ print(f'画像分析: {discord.__version__}')
 
 
 @client.event
-async def on_message(message):
-    # submit = message.guild.get_channel(897784178958008322)  # bot用チャット
+async def on_message(message: Message):
     if message.author.bot:
         return
 
@@ -21,17 +20,23 @@ async def on_message(message):
         await message.channel.send(f"{str(client.user)}\n{discord.__version__}")
         return
 
-    """if len(message.attachments) != 2 and message.channel.id == 897784178958008322:  # bot用チャット
-        admin = message.author.get_role(904368977092964352)  # ビト森杯運営
-        if bool(admin):
+    if message.channel.type == "private_thread":
+        if len(message.attachments) == 0:
+            return
+        channel_id = message.channel.parent_id
+    else:
+        channel_id = message.channel.id
+
+    if len(message.attachments) != 2 and channel_id == 1115986804026392627:  # マイクチェックチャンネル
+        if message.author.id == 412082841829113877:  # tari3210
             return
         await message.delete(delay=1)
         await message.channel.send(f"{message.author.mention}\nError: 画像を2枚同時に投稿してください。", delete_after=5)
         if len(message.attachments) == 1:
             await message.channel.send("画像1枚では、すべての設定項目が画像内に収まりません。", delete_after=5)
-        return"""
+        return
 
-    if len(message.attachments) == 2 and message.channel.id == 897784178958008322:  # 画像提出
+    if len(message.attachments) == 2 and channel_id == 1115986804026392627:  # マイクチェックチャンネル
         await analyze(message)
 
 
