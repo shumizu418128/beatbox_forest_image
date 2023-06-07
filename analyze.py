@@ -57,18 +57,18 @@ async def analyze(message: discord.Message):
         error_msg = []
         log = ""
         emoji = random.choice(message.guild.emojis)
-        embed_progress = Embed(title="分析中...", description=f"{emoji}▫️▫️▫️▫️▫️▫️▫️▫️▫️☑️")
+        embed_progress = Embed(title="分析中...", description=f"{emoji}▫️▫️▫️▫️▫️▫️▫️▫️☑️")
         progress = await channel.send(embed=embed_progress)
 
         # 感度設定
         error_msg, log = await mobile_check.sensitive_check(file_names, error_msg, log)
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
-        progress = await channel.send(embed=embed_progress)
+        await progress.edit(embed=embed_progress)
 
         # モバイルボイスオーバーレイ の座標検出
         all_text, mobile_voice_overlay, log = await mobile_check.text_check(file_names, log)
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
-        progress = await channel.send(embed=embed_progress)
+        await progress.edit(embed=embed_progress)
 
         # 外国語検出（ひらがな・カタカナが無い場合ストップ）
         if not re.search(r'[ぁ-ん]+|[ァ-ヴー]+', all_text):
@@ -78,29 +78,30 @@ async def analyze(message: discord.Message):
         # ノイズ抑制チェックマーク座標
         error_msg, log = await mobile_check.noise_suppression_check(file_names, error_msg, log)
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
-        progress = await channel.send(embed=embed_progress)
+        await progress.edit(embed=embed_progress)
 
         # 必要な設定項目があるか
         error_msg = await mobile_check.word_contain_check(all_text, error_msg)
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
-        progress = await channel.send(embed=embed_progress)
+        await progress.edit(embed=embed_progress)
 
         for file_name in file_names:
             # 設定オン座標検出
             circle_coordinate, log = await mobile_check.setting_off_check(file_name, log)
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
-            progress = await channel.send(embed=embed_progress)
+            await progress.edit(embed=embed_progress)
 
-            # モバイルボイスオーバーレイ、チェックマーク引き算
+            # モバイルボイスオーバーレイ引き算
             for setting_on in circle_coordinate:
                 for overlay in mobile_voice_overlay:
+                    log += f"オーバーレイ距離: {distance.euclidean(setting_on, overlay)}\n"
                     if distance.euclidean(setting_on, overlay) < 200:
                         circle_coordinate.remove(setting_on)
 
             # 赤丸書き出し
             error_msg = await mobile_check.circle_write(file_name, circle_coordinate, error_msg)
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
-            progress = await channel.send(embed=embed_progress)
+            await progress.edit(embed=embed_progress)
 
     # ログ表示
     embed = Embed(title="分析ログ", description=log)
