@@ -55,6 +55,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
 
         if Decimal(fraction_pixel) > Decimal("1.2"):  # 感度設定のピクセルが全体の1.2%以上ある = ノイズを検知している
             error_msg.append("* 感度設定を判定できませんでした。感度設定のバーの大部分が緑色になっていることをご確認ください。")
+
         elif Decimal(fraction_pixel) > Decimal("0.5"):  # 0.5以上で感度あり
             sensitive_exist = True
             if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
