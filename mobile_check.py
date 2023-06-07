@@ -95,16 +95,23 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 
     # モバイルボイスオーバーレイのチェック
     for monochrome_file_name in monochrome_file_names:
-        PIL_image = Image.open(monochrome_file_name)
-        text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
+        PIL_image_monochrome = Image.open(monochrome_file_name)
+
+        text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
         for text in text_box:
             all_text += text.content.replace(' ', '')
             if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
-                text_position = text.position
-                text_coordinate = [text_position[1][0], text_position[1][1]]
-                mobile_voice_overlay.append(text_coordinate)
+                # モバイルボイスオーバーレイの右下を記録
+                text_position = [text.position[1][0], text.position[1][1]]
+                mobile_voice_overlay.append(text_position)
+
+        # 1枚目・2枚目の間に分割の目印を入れる
         mobile_voice_overlay.append("split")
-    return [all_text, mobile_voice_overlay, log]
+
+    # モバイルボイスオーバーレイ リスト分割
+    index = mobile_voice_overlay.index("split")
+    split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index + 1: -1]]
+    return [all_text, split_overlay, log]
 
 
 async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], error_msg: list[str], log: str):
@@ -118,7 +125,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         center_text = []  # center_textは毎回クリア
         cv2_image = cv2.imread(file_name)
         PIL_image_monochrome = Image.open(monochrome_file_name)
-        cv2_image_monochrome = cv2.imread(monochrome_file_name)
+        cv2_image_monochrome = cv2.imread(monochrome_file_name, cv2.IMREAD_GRAYSCALE)
 
         # 白黒判定
         white_pixel = cv2.countNonZero(cv2_image_monochrome)
@@ -188,7 +195,7 @@ async def word_contain_check(all_text: str, error_msg: list[str]):  # 必要事�
 
 async def setting_off_check(file_name: str, log: str):  # 設定オン座標検出
     # 初期設定
-    coordinate_list = []
+    position_list = []
     cv2_image = cv2.imread(file_name)
 
     # 設定オン検知
@@ -205,13 +212,13 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
             _, width = cv2_image.shape[:2]
             if x < width * 2 / 3:  # 左側にあるやつは無視
                 continue
-            coordinate_list.append([x, y])
-    log += "設定オン座標: " + str(coordinate_list) + "\n"
-    return [coordinate_list, log]
+            position_list.append([x, y])
+    log += "設定オン座標: " + str(position_list) + "\n"
+    return [position_list, log]
 
 
-async def remove_overlay(circle_coordinate: list, overlay_list: list, i: int, log: str):
-    for setting_on in circle_coordinate:
+async def remove_overlay(circle_position: list, overlay_list: list, i: int, log: str):
+    for setting_on in circle_position:
         if bool(overlay_list):  # 中身ないときがある
             log += f"オーバーレイリスト{i + 1}: " + str(overlay_list) + "\n"
 
@@ -221,16 +228,16 @@ async def remove_overlay(circle_coordinate: list, overlay_list: list, i: int, lo
                 log += "オーバーレイ距離: " + "{:.1f}".format(overlay_distance) + "\n"
 
                 if overlay_distance < 150:  # 150未満ならモバイルボイスオーバーレイ設定オン 無視する
-                    circle_coordinate.remove(setting_on)
-    return [circle_coordinate, log]
+                    circle_position.remove(setting_on)
+    return [circle_position, log]
 
 
-async def write_circle(file_name: str, coordinate_list: list, error_msg: list[str]):  # 赤丸書き込み
+async def write_circle(file_name: str, position_list: list, error_msg: list[str]):  # 赤丸書き込み
     # 初期設定
     cv2_image = cv2.imread(file_name)
 
     # 設定がオンの部分に赤丸を書き込む
-    for xy in coordinate_list:
+    for xy in position_list:
         cv2.circle(cv2_image, (xy), 65, (0, 0, 255), 20)
         if "* 赤丸で囲われた設定をOFFにしてください。" not in error_msg:
             error_msg.append("* 赤丸で囲われた設定をOFFにしてください。")
