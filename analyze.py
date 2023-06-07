@@ -48,7 +48,7 @@ async def analyze(message: discord.Message):
     button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red, custom_id="button_support")
     view = View()
     view.add_item(button)
-    await channel.send("このbotは開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
+    await channel.send("このbotはベータ版です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
 
     # 画像ファイル判定、縦横比判定
     image_size_check = (message.attachments[0].height - message.attachments[1].height) + (message.attachments[0].width - message.attachments[1].width)
@@ -135,5 +135,5 @@ async def analyze(message: discord.Message):
     await channel.send(message.author.mention, embed=embed, files=[File(file_name) for file_name in file_names])
 
     # 報告ボタン
-    await channel.send("このbotは開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
+    await channel.send("このbotはベータ版です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
     return
