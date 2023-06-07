@@ -32,7 +32,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
     sensitive_high = True
 
     # 感度設定確認
-    for file_name in file_names:
+    for i, file_name in enumerate(file_names):
         image = cv2.imread(file_name)
         height, width = image.shape[:2]  # height -> Y座標  width -> X座標
         all_pixel = str(width * height)
@@ -52,6 +52,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
 
         color_pixel = str(green_pixels + yellow_pixels)  # みどり + きいろ
         fraction_pixel = Decimal(color_pixel) / Decimal(all_pixel) * Decimal("100")  # みどり + きいろ の比率(パーセント)
+        log += f"感度ピクセル比率{i + 1}: {fraction_pixel}%\n"
 
         if Decimal(fraction_pixel) > Decimal("1.2"):  # 感度設定のピクセルが全体の1.2%以上ある = ノイズを検知している
             error_msg.append("* 感度設定を判定できませんでした。感度設定のバーの大部分が緑色になっていることをご確認ください。")
