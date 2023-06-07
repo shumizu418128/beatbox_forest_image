@@ -77,7 +77,7 @@ async def analyze(message: discord.Message):
         await progress.edit(embed=embed_progress)
 
         # モバイルボイスオーバーレイ の座標検出
-        all_text, mobile_voice_overlay, log = await mobile_check.text_check(file_names, log)
+        all_text, split_overlay, log = await mobile_check.text_check(file_names, log)
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
@@ -96,23 +96,19 @@ async def analyze(message: discord.Message):
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
-        # モバイルボイスオーバーレイ リスト分割
-        index = mobile_voice_overlay.index("split")
-        split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index + 1: -1]]
-
         for i, (overlay_list, file_name) in enumerate(zip(split_overlay, file_names)):
             # 設定オン座標検出
-            circle_coordinate, log = await mobile_check.setting_off_check(file_name, log)
+            circle_position, log = await mobile_check.setting_off_check(file_name, log)
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
             # モバイルボイスオーバーレイ引き算
-            circle_coordinate, log = await mobile_check.remove_overlay(circle_coordinate, overlay_list, i, log)
+            circle_position, log = await mobile_check.remove_overlay(circle_position, overlay_list, i, log)
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
             # 赤丸書き出し
-            error_msg = await mobile_check.write_circle(file_name, circle_coordinate, error_msg)
+            error_msg = await mobile_check.write_circle(file_name, circle_position, error_msg)
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
