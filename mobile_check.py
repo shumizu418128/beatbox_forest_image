@@ -231,7 +231,10 @@ async def remove_overlay(circle_position: list, overlay_list: list, i: int, log:
                 log += "MVO y座標距離: " + str(overlay_distance) + "\n"
 
                 if overlay_distance < 100:  # 100未満ならモバイルボイスオーバーレイ設定オン 無視する
-                    circle_position.remove(setting_on)
+                    try:
+                        circle_position.remove(setting_on)
+                    except ValueError:
+                        pass
     return [circle_position, log]
 
 
