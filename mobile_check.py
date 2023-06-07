@@ -85,10 +85,9 @@ async def text_check(file_names: list[str], log: str):  # 各種設定項目チ�
             all_text += text.content.replace(' ', '')
             if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
                 text_position = text.position
-                center_text = [int((text_position[0][0] + text_position[1][0]) / 2),
-                               int((text_position[0][1] + text_position[1][1]) / 2)]
-                mobile_voice_overlay.append(center_text)
-                log += "オーバーレイ座標: " + str(center_text) + "\n"
+                text_coordinate = [text_position[1][0], text_position[1][1]]
+                mobile_voice_overlay.append(text_coordinate)
+                log += "オーバーレイ座標: " + str(text_coordinate) + "\n"
     return [all_text, mobile_voice_overlay, log]
 
 
