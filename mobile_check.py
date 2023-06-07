@@ -116,7 +116,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str], l
         # テンプレートマッチング
         result = cv2.matchTemplate(cv2_image, template, cv2.TM_CCOEFF_NORMED)
         _, precision, _, top_left = cv2.minMaxLoc(result)  # precision = 精度
-        log += f"MT精度{i + 1}: {precision}" + "\n"
+        log += f"MT精度{i + 1}: " + "{:.2%}".format(precision) + "\n"
         if precision < 0.7:  # 精度7割未満は検知失敗
             continue
         bottom_right = [top_left[0] + 60, top_left[1] + 60]
@@ -142,7 +142,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str], l
 
                 # 正しい場所
                 correct_place = [center_check_mark[0], center_text[1]]
-                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
+                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 3)
                 cv2.imwrite(file_name, cv2_image)
                 error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
 
