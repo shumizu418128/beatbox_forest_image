@@ -8,6 +8,24 @@ from PIL import Image
 from scipy.spatial import distance
 
 
+async def edit_image(file_names: list[str]):
+    # 初期設定
+    monochrome_file_names = [file_name[:5] + "monochrome" + file_name[5:] for file_name in file_names]
+
+    for file_name, monochrome_file_name in zip(file_names, monochrome_file_names):
+        # 上10%カット
+        image = cv2.imread(file_name)
+        height, width = image.shape[:2]  # height -> Y座標  width -> X座標
+        image_crop = image[int(height / 10): height, 0: width]  # y, x    ここで上10%カット
+        cv2.imwrite(file_name, image_crop)
+
+        # モノクロ画像を作る
+        image_gray = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
+        _, image_monochrome = cv2.threshold(image_gray, 0, 255, cv2.THRESH_OTSU)
+        cv2.imwrite(monochrome_file_name, image_monochrome)
+    return monochrome_file_names
+
+
 async def sensitive_check(file_names: list[str], error_msg: list[str], log: str):  # 感度設定
     # 初期設定
     sensitive_exist = False
@@ -17,12 +35,10 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
     for file_name in file_names:
         image = cv2.imread(file_name)
         height, width = image.shape[:2]  # height -> Y座標  width -> X座標
-        image_crop = image[int(height / 10): height, 0: width]  # y, x    ここで上10%カット
-        cv2.imwrite(file_name, image_crop)
         all_pixel = str(width * height)
         center = [width / 3, height / 3]  # 3で割っているのは、感度設定の座標を検出するため
 
-        hsv = cv2.cvtColor(image_crop, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
 
         lower = np.array([63, 0, 0])  # しきい値 みどり
         upper = np.array([76, 255, 255])
@@ -59,8 +75,8 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
                         closest = color_distance
                         closest_xy = xy
                 # 感度設定に関してはここで書き出しを行う
-                cv2.circle(image_crop, (75, closest_xy[1]), 65, (0, 0, 255), 20)  # x = 75にして常に最高感度を要求
-                cv2.imwrite(file_name, image_crop)
+                cv2.circle(image, (75, closest_xy[1]), 65, (0, 0, 255), 20)  # x = 75にして常に最高感度を要求
+                cv2.imwrite(file_name, image)
                 log += "感度座標: " + str(closest_xy) + "\n"
     if sensitive_exist is False:
         error_msg.append("* 感度設定が映るようにしてください。一部端末では「マイクのテスト」ボタンを押すと表示されます。")
@@ -69,7 +85,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
     return [error_msg, log]
 
 
-async def text_check(file_names: list[str], log: str):  # 各種設定項目チェック
+async def text_check(monochrome_file_names: list[str], log: str):  # 各種設定項目チェック
     # 初期設定
     tools = pyocr.get_available_tools()
     tool = tools[0]
@@ -78,9 +94,9 @@ async def text_check(file_names: list[str], log: str):  # 各種設定項目チ�
     mobile_voice_overlay = []
 
     # モバイルボイスオーバーレイのチェック
-    for file_name in file_names:
-        PIL_image = Image.open(file_name)
-        text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))  # TODO 2値化した画像で読み込む
+    for monochrome_file_name in monochrome_file_names:
+        PIL_image = Image.open(monochrome_file_name)
+        text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
         for text in text_box:
             all_text += text.content.replace(' ', '')
             if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
@@ -91,23 +107,22 @@ async def text_check(file_names: list[str], log: str):  # 各種設定項目チ�
     return [all_text, mobile_voice_overlay, log]
 
 
-async def noise_suppression_check(file_names: list[str], error_msg: list[str], log: str):
+async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], error_msg: list[str], log: str):
     # 初期設定
     tools = pyocr.get_available_tools()
     tool = tools[0]
     lang = "jpn"
 
     noise_suppression = []  # noise_suppressionは保存
-    for i, file_name in enumerate(file_names):
+    for i, (file_name, monochrome_file_name) in enumerate(zip(file_names, monochrome_file_names)):
         center_text = []  # center_textは毎回クリア
-        PIL_image = Image.open(file_name)
         cv2_image = cv2.imread(file_name)
+        PIL_image_monochrome = Image.open(monochrome_file_name)
+        cv2_image_monochrome = cv2.imread(monochrome_file_name)
 
         # 白黒判定
-        img_gray = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
-        _, img_monochrome = cv2.threshold(img_gray, 0, 255, cv2.THRESH_OTSU)
-        white_pixel = cv2.countNonZero(img_monochrome)
-        black_pixel = img_monochrome.size - white_pixel
+        white_pixel = cv2.countNonZero(cv2_image_monochrome)
+        black_pixel = cv2_image_monochrome.size - white_pixel
         if white_pixel > black_pixel:
             template = cv2.imread("template_white.png")
         else:
@@ -124,7 +139,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str], l
         noise_suppression.append(center_check_mark)
 
         # 「設定しない」の位置チェック
-        text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))  # TODO 2値化した画像で読み込む
+        text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
         for text in text_box:
             if "設定しない" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
@@ -195,7 +210,22 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
     return [coordinate_list, log]
 
 
-async def circle_write(file_name: str, coordinate_list: list, error_msg: list[str]):  # 赤丸書き込み
+async def remove_overlay(circle_coordinate: list, overlay_list: list, i: int, log: str):
+    for setting_on in circle_coordinate:
+        if bool(overlay_list):  # 中身ないときがある
+            log += f"オーバーレイリスト{i + 1}: " + str(overlay_list) + "\n"
+
+            for overlay in overlay_list:
+                # オーバーレイと設定オンの距離を計算
+                overlay_distance = distance.euclidean(setting_on, overlay)
+                log += "オーバーレイ距離: " + "{:.1f}".format(overlay_distance) + "\n"
+
+                if overlay_distance < 150:  # 150未満ならモバイルボイスオーバーレイ設定オン 無視する
+                    circle_coordinate.remove(setting_on)
+    return [circle_coordinate, log]
+
+
+async def write_circle(file_name: str, coordinate_list: list, error_msg: list[str]):  # 赤丸書き込み
     # 初期設定
     cv2_image = cv2.imread(file_name)
 
