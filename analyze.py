@@ -63,7 +63,7 @@ async def analyze(message: discord.Message):
         error_msg = []
         log = ""
         emoji = random.choice(message.guild.emojis)
-        embed_progress = Embed(title="分析中...", description=f"{emoji}▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️☑️")
+        embed_progress = Embed(title="分析中...", description=f"{emoji}▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️☑️")
         progress = await channel.send(embed=embed_progress)
 
         # モノクロ画像を作る・上10%カット
