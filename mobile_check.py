@@ -107,6 +107,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
                 # モバイルボイスオーバーレイの右下を記録
                 text_position = [text.position[1][0], text.position[1][1]]
                 mobile_voice_overlay.append(text_position)
+                break
 
         # 1枚目・2枚目の間に分割の目印を入れる
         mobile_voice_overlay.append("split")
@@ -199,7 +200,7 @@ async def word_contain_check(all_text: str, error_msg: list[str]):  # 必要事�
 
 async def setting_off_check(file_name: str, log: str):  # 設定オン座標検出
     # 初期設定
-    position_list = []
+    circle_position = []
     cv2_image = cv2.imread(file_name)
 
     # 設定オン検知
@@ -216,9 +217,9 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
             _, width = cv2_image.shape[:2]
             if x < width * 2 / 3:  # 左側にあるやつは無視
                 continue
-            position_list.append([x, y])
-    log += "設定オン座標: " + str(position_list) + "\n"
-    return [position_list, log]
+            circle_position.append([x, y])
+    log += "設定オン座標: " + str(circle_position) + "\n"
+    return [circle_position, log]
 
 
 async def remove_overlay(circle_position: list, overlay_list: list, i: int, log: str):
