@@ -169,7 +169,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
 
                 # 正しい場所
                 correct_place = [center_check_mark[0], center_text[1]]
-                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 3)
+                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
                 cv2.imwrite(file_name, cv2_image)
                 error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
 
