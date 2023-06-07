@@ -15,18 +15,18 @@ async def analyze(message: discord.Message):
     file_names = []
 
     await message.delete()
-    threads = message.channel.threads
-    thread_names = [thread.name for thread in threads]
-    if str(message.author.id) not in thread_names:
-        try:
-            channel = await message.channel.create_thread(name=f"{message.author.id}")
-        except AttributeError:  # スレッド作成失敗 -> 送信チャンネルがスレッド
-            if len(message.attachments) != 2:
-                return
-            channel = message.channel
+    try:
+        threads = message.channel.threads
+    except AttributeError:  # スレッド取得失敗 -> 送信チャンネルがスレッド
+        channel = message.channel
     else:
-        index = thread_names.index(str(message.author.id))
-        channel = threads[index]
+        thread_names = [thread.name for thread in threads]
+        if str(message.author.id) not in thread_names:  # 無いなら作る
+            channel = await message.channel.create_thread(name=f"{message.author.id}")
+        else:  # あるなら使う
+            index = thread_names.index(str(message.author.id))
+            channel = threads[index]
+
     await channel.send(f"ご提出ありがとうございます。\n分析を行います。しばらくお待ちください。\n\n分析が完了すると {message.author.mention} さんへ再度通知を送信します。")
     if bool(message.content):
         embed = Embed(title="画像と一緒に送信された文", description=message.content)
