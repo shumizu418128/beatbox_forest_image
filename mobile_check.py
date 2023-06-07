@@ -156,7 +156,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         if bool(center_text):  # 「設定しない」があるとき
             # チェックマーク &「設定しない」の、y座標の距離
             distance_y = abs(center_check_mark[1] - center_text[1])
-            log += f"y座標距離{i + 1}: {distance_y}" + "\n"
+            log += f"MT y座標距離{i + 1}: {distance_y}" + "\n"
 
             if distance_y > 20:  # 理論上は距離0 このifに引っかかる = ノイキャン設定不適切
                 # チェックマークに斜線
@@ -220,14 +220,14 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
 async def remove_overlay(circle_position: list, overlay_list: list, i: int, log: str):
     for setting_on in circle_position:
         if bool(overlay_list):  # 中身ないときがある
-            log += f"オーバーレイリスト{i + 1}: " + str(overlay_list) + "\n"
+            log += f"MVO座標{i + 1}: " + str(overlay_list) + "\n"
 
             for overlay in overlay_list:
-                # オーバーレイと設定オンの距離を計算
-                overlay_distance = distance.euclidean(setting_on, overlay)
-                log += "オーバーレイ距離: " + "{:.1f}".format(overlay_distance) + "\n"
+                # オーバーレイと設定オンのy座標距離を計算
+                overlay_distance = abs(setting_on[1] - overlay[1])
+                log += "MVO y座標距離: " + str(overlay_distance) + "\n"
 
-                if overlay_distance < 150:  # 150未満ならモバイルボイスオーバーレイ設定オン 無視する
+                if overlay_distance < 40:  # 40未満ならモバイルボイスオーバーレイ設定オン 無視する
                     circle_position.remove(setting_on)
     return [circle_position, log]
 
