@@ -52,9 +52,9 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
 
         color_pixel = str(green_pixels + yellow_pixels)  # みどり + きいろ
         fraction_pixel = Decimal(color_pixel) / Decimal(all_pixel) * Decimal("100")  # みどり + きいろ の比率(パーセント)
-        log += f"感度ピクセル比率{i + 1}: {fraction_pixel}%\n"
+        log += f"感度ピクセル比率{i + 1}: " + "{:.2f}%".format(fraction_pixel) + "\n"
 
-        if Decimal(fraction_pixel) > Decimal("1.2"):  # 感度設定のピクセルが全体の1.2%以上ある = ノイズを検知している
+        if Decimal(fraction_pixel) > Decimal("1.4"):  # 感度設定のピクセルが全体の1.2%以上ある = ノイズを検知している
             error_msg.append("* 感度設定を判定できませんでした。感度設定のバーの大部分が緑色になっていることをご確認ください。")
 
         elif Decimal(fraction_pixel) > Decimal("0.5"):  # 0.5以上で感度あり
