@@ -27,9 +27,10 @@ async def analyze(message: discord.Message):
     else:
         index = thread_names.index(str(message.author.id))
         channel = threads[index]
-    await channel.send(f"{message.author.mention}\nご提出ありがとうございます。\n分析を行います。しばらくお待ちください。")
+    await channel.send(f"ご提出ありがとうございます。\n分析を行います。しばらくお待ちください。\n\n分析が完了すると {message.author.mention} さんへ再度通知を送信します。")
     if bool(message.content):
-        await channel.send("※画像と一緒に送信されたメッセージ文は削除されました。")
+        embed = Embed(title="画像と一緒に送信された文", description=message.content)
+        await channel.send(embed=embed)
 
     # 画像保存
     for attachment in message.attachments:
@@ -50,8 +51,7 @@ async def analyze(message: discord.Message):
     await channel.send("このbotはベータ版です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
 
     # 画像ファイル判定、縦横比判定
-    image_size_check = (message.attachments[0].height - message.attachments[1].height) + (message.attachments[0].width - message.attachments[1].width)
-    if message.attachments[0].height < message.attachments[0].width or bool(image_size_check):  # たて < よこ ならPCと判定
+    if message.attachments[0].height < message.attachments[0].width:  # たて < よこ ならPCと判定
         # PC版
         await channel.send(f"{message.author.mention}\nError: PC版Discordの画像と判定されました。\nPC版Discordの画像分析は、近日対応予定です。")
         return
