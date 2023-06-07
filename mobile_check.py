@@ -80,7 +80,7 @@ async def text_check(file_names: list[str], log: str):  # 各種設定項目チ�
     # モバイルボイスオーバーレイのチェック
     for file_name in file_names:
         PIL_image = Image.open(file_name)
-        text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
+        text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))  # TODO 2値化した画像で読み込む
         for text in text_box:
             all_text += text.content.replace(' ', '')
             if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
@@ -124,7 +124,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str], l
         noise_suppression.append(center_check_mark)
 
         # 「設定しない」の位置チェック
-        text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
+        text_box = tool.image_to_string(PIL_image, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))  # TODO 2値化した画像で読み込む
         for text in text_box:
             if "設定しない" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
