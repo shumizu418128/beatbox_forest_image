@@ -107,7 +107,7 @@ async def analyze(message: discord.Message):
                 if bool(overlay_list):
                     for overlay_coordinate in overlay_list:
                         log += f"オーバーレイ距離: {distance.euclidean(setting_on, overlay_coordinate)}\n"
-                        if distance.euclidean(setting_on, overlay_coordinate) < 200:
+                        if distance.euclidean(setting_on, overlay_coordinate) < 150:
                             circle_coordinate.remove(setting_on)
 
             # 赤丸書き出し
