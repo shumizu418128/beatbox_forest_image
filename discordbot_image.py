@@ -37,8 +37,9 @@ async def on_message(message):
 
 @client.event
 async def on_interaction(interaction: Interaction):
+    await interaction.response.defer(ephemeral=True, thinking=False)
+
     if interaction.custom_id == "button_support":
-        await interaction.response.defer(ephemeral=True, thinking=False)
         bot_channel = interaction.guild.get_channel(897784178958008322)  # bot用チャット
         tari3210 = interaction.guild.get_member(412082841829113877)
         await bot_channel.send(f"{tari3210.mention}\nエラー報告\n\n{interaction.channel.jump_url}")
