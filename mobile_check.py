@@ -149,7 +149,7 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str], l
 
     if bool(noise_suppression) is False:  # 中身が空なら失敗
         error_msg.append('* ノイズ抑制設定のチェックマーク検出に失敗しました。')
-    return [error_msg, noise_suppression, log]
+    return [error_msg, log]
 
 
 async def word_contain_check(all_text: str, error_msg: list[str]):  # 必要事項があるかチェック
