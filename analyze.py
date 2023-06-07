@@ -95,7 +95,7 @@ async def analyze(message: discord.Message):
         index = mobile_voice_overlay.index("split")
         split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index: -1].remove("split")]
 
-        for overlay, file_name in zip(split_overlay, file_names):
+        for overlay_list, file_name in zip(split_overlay, file_names):
             # 設定オン座標検出
             circle_coordinate, log = await mobile_check.setting_off_check(file_name, log)
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
@@ -103,10 +103,11 @@ async def analyze(message: discord.Message):
 
             # モバイルボイスオーバーレイ引き算
             for setting_on in circle_coordinate:
-                for overlay_ in overlay:
-                    log += f"オーバーレイ距離: {distance.euclidean(setting_on, overlay)}\n"
-                    if distance.euclidean(setting_on, overlay_) < 200:
-                        circle_coordinate.remove(setting_on)
+                if bool(overlay_list):
+                    for overlay_coordinate in overlay_list:
+                        log += f"オーバーレイ距離: {distance.euclidean(setting_on, overlay_coordinate)}\n"
+                        if distance.euclidean(setting_on, overlay_coordinate) < 200:
+                            circle_coordinate.remove(setting_on)
 
             # 赤丸書き出し
             error_msg = await mobile_check.circle_write(file_name, circle_coordinate, error_msg)
