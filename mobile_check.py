@@ -88,6 +88,7 @@ async def text_check(file_names: list[str], log: str):  # 各種設定項目チ�
                 text_coordinate = [text_position[1][0], text_position[1][1]]
                 mobile_voice_overlay.append(text_coordinate)
                 log += "オーバーレイ座標: " + str(text_coordinate) + "\n"
+        mobile_voice_overlay.append("split")
     return [all_text, mobile_voice_overlay, log]
 
 
