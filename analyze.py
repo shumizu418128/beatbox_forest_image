@@ -44,6 +44,12 @@ async def analyze(message: discord.Message):
         await channel.send(name.replace('/tmp/', ''), file=discord.File(name))
         await sleep(1)
 
+    # 報告ボタン
+    button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red, custom_id="button_support")
+    view = View()
+    view.add_item(button)
+    await channel.send("このbotは開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
+
     # 画像ファイル判定、縦横比判定
     image_size_check = (message.attachments[0].height - message.attachments[1].height) + (message.attachments[0].width - message.attachments[1].width)
     if message.attachments[0].height < message.attachments[0].width or bool(image_size_check):  # たて < よこ ならPCと判定
@@ -123,8 +129,5 @@ async def analyze(message: discord.Message):
     await channel.send(message.author.mention, embed=embed, files=[File(file_name) for file_name in file_names])
 
     # 報告ボタン
-    button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red, custom_id="button_support")
-    view = View()
-    view.add_item(button)
-    await channel.send("このbotは開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。\n\n* エラー内容に誤りがある・エラー内容がよくわからない\n* botが変な動作をしている", view=view)
+    await channel.send("このbotは開発段階です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
     return
