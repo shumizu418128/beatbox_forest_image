@@ -1,5 +1,4 @@
 from decimal import Decimal
-import re
 
 import cv2
 import numpy as np
@@ -138,15 +137,15 @@ async def noise_suppression_check(file_names: list[str], error_msg: list[str], l
             distance_y = abs(center_check_mark[1] - center_text[1])
             log += f"y座標距離{i + 1}: {distance_y}" + "\n"
 
-        if distance_y > 20 or bool(center_text) is False:  # 理論上は距離0 このifに引っかかる = ノイキャン設定不適切
-            # チェックマークに斜線
-            cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
+            if distance_y > 20:  # 理論上は距離0 このifに引っかかる = ノイキャン設定不適切
+                # チェックマークに斜線
+                cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
 
-            # 正しい場所
-            correct_place = [center_check_mark[0], center_text[1]]
-            cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
-            cv2.imwrite(file_name, cv2_image)
-            error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
+                # 正しい場所
+                correct_place = [center_check_mark[0], center_text[1]]
+                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
+                cv2.imwrite(file_name, cv2_image)
+                error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
 
     if bool(noise_suppression) is False:  # 中身が空なら失敗
         error_msg.append('* ノイズ抑制設定のチェックマーク検出に失敗しました。')
@@ -210,43 +209,3 @@ async def circle_write(file_name: str, coordinate_list: list, error_msg: list[st
         error_msg.append("* 赤丸で囲われた設定をOFFにしてください。")
     cv2.imwrite(file_name, cv2_image)
     return error_msg
-
-
-async def mobile_check(file_names: list[str]):
-    # 初期設定
-    error_msg = []
-    log = ""
-
-    # 感度設定
-    error_msg, log = await sensitive_check(file_names, error_msg, log)
-
-    # モバイルボイスオーバーレイ の座標検出
-    all_text, mobile_voice_overlay, log = await text_check(file_names, log)
-
-    # ノイズ抑制チェックマーク座標
-    error_msg, noise_suppression, log = await noise_suppression_check(file_names, error_msg, log)
-
-    # 必要な設定項目があるか
-    error_msg = await word_contain_check(all_text, error_msg)
-
-    for file_name in file_names:
-        # 外国語検出（ひらがな・カタカナが無い場合ストップ）
-        if not re.search(r'[ぁ-ん]+|[ァ-ヴー]+', all_text):
-            return "not_japanese"
-
-        # 設定オン座標検出
-        circle_coordinate, log = await setting_off_check(file_name, log)
-
-        # モバイルボイスオーバーレイ、チェックマーク引き算
-        for setting_on in circle_coordinate:
-            for overlay in mobile_voice_overlay:
-                if distance.euclidean(setting_on, overlay) < 200:
-                    circle_coordinate.remove(setting_on)
-            for noise in noise_suppression:
-                if distance.euclidean(setting_on, noise) < 60:
-                    circle_coordinate.remove(setting_on)
-
-        # 赤丸書き出し
-        error_msg = await circle_write(file_name, circle_coordinate, error_msg)
-
-    return [error_msg, log]
