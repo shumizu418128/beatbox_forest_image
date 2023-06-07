@@ -1,7 +1,7 @@
 import os
 
 import discord
-from discord import Client, Interaction, Message
+from discord import ChannelType, Client, Interaction, Message
 from analyze import analyze
 
 TOKEN = os.environ['DISCORD_BOT_TOKEN']
@@ -20,7 +20,7 @@ async def on_message(message: Message):
         await message.channel.send(f"{str(client.user)}\n{discord.__version__}")
         return
 
-    if message.channel.type == "private_thread":
+    if message.channel.type == ChannelType.private_thread:
         if len(message.attachments) == 0:
             return
         channel_id = message.channel.parent_id
