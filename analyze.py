@@ -6,7 +6,6 @@ from datetime import datetime
 import discord
 from discord import ButtonStyle, Embed, File
 from discord.ui import Button, View
-from scipy.spatial import distance
 
 import mobile_check
 
