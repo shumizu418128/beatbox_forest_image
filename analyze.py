@@ -63,8 +63,13 @@ async def analyze(message: discord.Message):
         error_msg = []
         log = ""
         emoji = random.choice(message.guild.emojis)
-        embed_progress = Embed(title="分析中...", description=f"{emoji}▫️▫️▫️▫️▫️▫️▫️▫️☑️")
+        embed_progress = Embed(title="分析中...", description=f"{emoji}▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️☑️")
         progress = await channel.send(embed=embed_progress)
+
+        # モノクロ画像を作る・上10%カット
+        monochrome_file_names = await mobile_check.edit_image(file_names)
+        embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+        await progress.edit(embed=embed_progress)
 
         # 感度設定
         error_msg, log = await mobile_check.sensitive_check(file_names, error_msg, log)
@@ -82,7 +87,7 @@ async def analyze(message: discord.Message):
             return
 
         # ノイズ抑制チェックマーク座標
-        error_msg, log = await mobile_check.noise_suppression_check(file_names, error_msg, log)
+        error_msg, log = await mobile_check.noise_suppression_check(file_names, monochrome_file_names, error_msg, log)
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
@@ -102,20 +107,12 @@ async def analyze(message: discord.Message):
             await progress.edit(embed=embed_progress)
 
             # モバイルボイスオーバーレイ引き算
-            for setting_on in circle_coordinate:
-                if bool(overlay_list):  # 中身ないときがある
-                    log += f"オーバーレイリスト{i + 1}: " + str(overlay_list) + "\n"
-
-                    for overlay in overlay_list:
-                        # オーバーレイと設定オンの距離を計算
-                        overlay_distance = distance.euclidean(setting_on, overlay)
-                        log += "オーバーレイ距離: " + "{:.1f}".format(overlay_distance) + "\n"
-
-                        if overlay_distance < 150:  # 150未満ならモバイルボイスオーバーレイ設定オン 無視する
-                            circle_coordinate.remove(setting_on)
+            circle_coordinate, log = await mobile_check.remove_overlay(circle_coordinate, overlay_list, i, log)
+            embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+            await progress.edit(embed=embed_progress)
 
             # 赤丸書き出し
-            error_msg = await mobile_check.circle_write(file_name, circle_coordinate, error_msg)
+            error_msg = await mobile_check.write_circle(file_name, circle_coordinate, error_msg)
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
