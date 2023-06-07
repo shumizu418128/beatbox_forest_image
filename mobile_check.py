@@ -98,7 +98,8 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
     for monochrome_file_name in monochrome_file_names:
         PIL_image_monochrome = Image.open(monochrome_file_name)
 
-        text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
+        text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
+        text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
         for text in text_box:
             all_text += text.content.replace(' ', '')
             if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
@@ -147,7 +148,8 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         noise_suppression.append(center_check_mark)
 
         # 「設定しない」の位置チェック
-        text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
+        text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
+        text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
         for text in text_box:
             if "設定しない" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
