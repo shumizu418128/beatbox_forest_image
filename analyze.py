@@ -1,7 +1,7 @@
 import random
 import re
 from asyncio import sleep
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import discord
 from discord import ButtonStyle, Embed, File
@@ -67,16 +67,19 @@ async def analyze(message: discord.Message):
 
         # モノクロ画像を作る・上10%カット
         monochrome_file_names = await mobile_check.edit_image(file_names)
+
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         # 感度設定
         error_msg, log = await mobile_check.sensitive_check(file_names, error_msg, log)
+
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         # モバイルボイスオーバーレイ の座標検出
-        all_text, split_overlay, log = await mobile_check.text_check(file_names, log)
+        all_text, text_box, split_overlay, log = await mobile_check.text_check(file_names, log)
+
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
@@ -86,28 +89,33 @@ async def analyze(message: discord.Message):
             return
 
         # ノイズ抑制チェックマーク座標
-        error_msg, log = await mobile_check.noise_suppression_check(file_names, monochrome_file_names, error_msg, log)
+        error_msg, log = await mobile_check.noise_suppression_check(file_names, monochrome_file_names, text_box, error_msg, log)
+
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         # 必要な設定項目があるか
         error_msg = await mobile_check.word_contain_check(all_text, error_msg)
+
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         for i, (overlay_list, file_name) in enumerate(zip(split_overlay, file_names)):
             # 設定オン座標検出
             circle_position, log = await mobile_check.setting_off_check(file_name, log)
+
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
             # モバイルボイスオーバーレイ引き算
             circle_position, log = await mobile_check.remove_overlay(circle_position, overlay_list, i, log)
+
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
             # 赤丸書き出し
             error_msg = await mobile_check.write_circle(file_name, circle_position, error_msg)
+
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
@@ -118,7 +126,9 @@ async def analyze(message: discord.Message):
     # 結果通知
     tari3210 = message.guild.get_member(412082841829113877)
     embed = Embed(title="分析結果", description=":ok:\n問題なし", color=0x00ff00)
-    embed.set_footer(text=f"画像分析bot 制作: {str(tari3210)}", icon_url=tari3210.avatar.url)
+    embed.set_footer(text=f"bot開発者: {str(tari3210)}", icon_url=tari3210.avatar.url)
+    JST = timezone(timedelta(hours=9))
+    embed.timestamp = datetime.now(JST)
     if len(error_msg) > 0:
         embed.color = 0xff0000
         embed.description = ":x: \n以下の問題が見つかりました。\n\n-------------"
