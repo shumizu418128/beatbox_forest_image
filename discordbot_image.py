@@ -33,7 +33,7 @@ async def on_message(message: Message):
         await message.delete(delay=1)
         await message.channel.send(f"{message.author.mention}\nError: 画像を2枚同時に投稿してください。", delete_after=5)
         if len(message.attachments) == 1:
-            await message.channel.send("画像1枚では、すべての設定項目が画像内に収まりません。", delete_after=5)
+            await message.channel.send("ほとんどの端末では、画像1枚では、すべての設定項目が画像内に収まりません。\n画像1枚ですべての設定項目が画像内に収まる場合、同じ画像を2枚提出してください。", delete_after=5)
         return
 
     if len(message.attachments) == 2 and channel_id in [1115986804026392627, 897784178958008322]:  # マイクチェックチャンネル bot用チャット
