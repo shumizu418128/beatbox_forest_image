@@ -101,8 +101,11 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 
         text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
         text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
+
         for text in text_box:
             all_text += text.content.replace(' ', '')
+
+        for text in text_box:
             if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
                 # モバイルボイスオーバーレイの右下を記録
                 text_position = [text.position[1][0], text.position[1][1]]
@@ -115,20 +118,14 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
     # モバイルボイスオーバーレイ リスト分割
     index = mobile_voice_overlay.index("split")
     split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index + 1: -1]]
-    return [all_text, split_overlay, log]
+    return [all_text, text_box, split_overlay, log]
 
 
-async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], error_msg: list[str], log: str):
-    # 初期設定
-    tools = pyocr.get_available_tools()
-    tool = tools[0]
-    lang = "jpn"
-
+async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], text_box: list, error_msg: list[str], log: str):
     noise_suppression = []  # noise_suppressionは保存
     for i, (file_name, monochrome_file_name) in enumerate(zip(file_names, monochrome_file_names)):
         center_text = []  # center_textは毎回クリア
         cv2_image = cv2.imread(file_name)
-        PIL_image_monochrome = Image.open(monochrome_file_name)
         cv2_image_monochrome = cv2.imread(monochrome_file_name, cv2.IMREAD_GRAYSCALE)
 
         # 白黒判定
@@ -150,8 +147,6 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         noise_suppression.append(center_check_mark)
 
         # 「設定しない」の位置チェック
-        text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
-        text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
         for text in text_box:
             if "設定しない" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
