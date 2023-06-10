@@ -3,8 +3,7 @@ USER root
 
 RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
-RUN apt-get update && \
-    apt-get -y install python3-pip && \
+RUN apt-get -y install python3-pip && \
     apt-get -y install git &&
 
 RUN apt-get install -y tesseract-ocr \
