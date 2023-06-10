@@ -1,6 +1,9 @@
 FROM python:3.11
 USER root
 
+ARG TESSERACT_VERSION="main"
+ARG TESSERACT_URL="https://api.github.com/repos/tesseract-ocr/tesseract/tarball/$TESSERACT_VERSION"
+
 ENV LANG ja_JP.UTF-8
 ENV LANGUAGE ja_JP:ja
 ENV LC_ALL ja_JP.UTF-8
@@ -17,6 +20,17 @@ RUN apt-get install -y tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 RUN add-apt-repository ppa:alex-p/tesseract-ocr5
+
+RUN wget -qO tesseract.tar.gz $TESSERACT_URL && \
+    tar -xzf tesseract.tar.gz && \
+    rm tesseract.tar.gz && \
+    mv tesseract-* tesseract
+RUN ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install && \
+    ldconfig
+
 RUN pip install git+https://github.com/Rapptz/discord.py \
     pip install pynacl \
     pip install asyncio \
