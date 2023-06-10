@@ -1,31 +1,12 @@
-FROM python:3.11
+FROM ubuntu:latest
 USER root
 
-ARG TESSERACT_VERSION="main"
-ARG TESSERACT_URL="https://api.github.com/repos/tesseract-ocr/tesseract/tarball/$TESSERACT_VERSION"
+RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
-ENV LANG ja_JP.UTF-8
-ENV LANGUAGE ja_JP:ja
-ENV LC_ALL ja_JP.UTF-8
-ENV TZ JST-9
-ENV TERM xterm
+RUN apt-get update && \
+    apt-get -y install python3-pip && \
+    apt-get -y install git &&
 
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository ppa:alex-p/tesseract-ocr5
-RUN apt-get update
-RUN apt-get install -y tesseract-ocr libtesseract-dev
-RUN apt-get update
-RUN apt-get install -y python3 python3-pip
-RUN apt-get clean
-RUN pip3 install pyocr
-RUN rm -rf /var/lib/apt/lists/*
-
-RUN /usr/local/bin/python -m pip install --upgrade pip
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y software-properties-common
 RUN apt-get install -y tesseract-ocr \
     tesseract-ocr-eng \
     tesseract-ocr-jpn \
@@ -33,20 +14,13 @@ RUN apt-get install -y tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 RUN add-apt-repository ppa:alex-p/tesseract-ocr5
+RUN apt-get update
 
-RUN wget -qO tesseract.tar.gz $TESSERACT_URL && \
-    tar -xzf tesseract.tar.gz && \
-    rm tesseract.tar.gz && \
-    mv tesseract-* tesseract
+COPY requirements.txt requirements.txt
 
-RUN pip install git+https://github.com/Rapptz/discord.py \
-    pip install pynacl \
-    pip install asyncio \
-    pip install Pillow \
-    pip install numpy \
-    pip install pyocr \
-    pip install opencv-python--headless \
-    pip install scipy
+RUN pip install -U pip && \
+    pip install requirements.txt
+
 COPY discordbot_image.py discordbot_image.py
 COPY mobile_check.py mobile_check.py
 COPY analyze.py analyze.py
@@ -55,6 +29,7 @@ COPY template_white.png template_white.png
 COPY makesomenoise-4243a19364b1.json makesomenoise-4243a19364b1.json
 COPY eng.traineddata eng.traineddata
 COPY jpn.traineddata jpn.traineddata
+
 RUN tesseract -v
 CMD ["python", "-u", "discordbot_image.py"]
 ARG EnvironmentVariable
