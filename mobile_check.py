@@ -206,7 +206,7 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
     contours, _ = cv2.findContours(frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
     for c in contours:
         area = cv2.contourArea(c, False)
-        if area > 50:  # 面積50以上で設定オンとみなす
+        if area > 200:  # 面積200以上で設定オンとみなす
             result = cv2.moments(c)
             x, y = int(result["m10"] / result["m00"]), int(result["m01"] / result["m00"])
             _, width = cv2_image.shape[:2]
