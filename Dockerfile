@@ -9,11 +9,12 @@ ENV TERM xterm
 RUN /usr/local/bin/python -m pip install --upgrade pip
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y \
-    tesseract-ocr \
-    tesseract-ocr-eng \
-    tesseract-ocr-jpn \
-    libtesseract-dev \
+    && apt-get install -y software-properties-common
+RUN add-apt-repository ppa:alex-p/tesseract-ocr5
+RUN apt-get install -y tesseract-ocr \
+    && tesseract-ocr-eng \
+    && tesseract-ocr-jpn \
+    && libtesseract-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install git+https://github.com/Rapptz/discord.py \
