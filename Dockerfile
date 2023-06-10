@@ -25,11 +25,6 @@ RUN wget -qO tesseract.tar.gz $TESSERACT_URL && \
     tar -xzf tesseract.tar.gz && \
     rm tesseract.tar.gz && \
     mv tesseract-* tesseract
-RUN ./autogen.sh && \
-    ./configure && \
-    make && \
-    make install && \
-    ldconfig
 
 RUN pip install git+https://github.com/Rapptz/discord.py \
     pip install pynacl \
