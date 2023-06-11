@@ -93,7 +93,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
     tool = tools[0]
     lang = "jpn"
     all_text = ""
-    mobile_voice_overlay = []
+    ignores = []
 
     # モバイルボイスオーバーレイのチェック
     for monochrome_file_name in monochrome_file_names:
@@ -106,20 +106,27 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
             all_text += text.content.replace(' ', '')
             print(text.content.replace(' ', ''))
 
+        overlay = False
+        H265 = False
         for text in text_box:
-            if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
+            if "モバイルボイスオーバーレイ" in text.content.replace(' ', '') and overlay is False:
                 # モバイルボイスオーバーレイの右下を記録
                 text_position = [text.position[1][0], text.position[1][1]]
-                mobile_voice_overlay.append(text_position)
-                break
+                ignores.append(text_position)
+                overlay = True
+            if "H265" in text.content.replace(' ', '') and H265 is False:
+                # H265の右下を記録
+                text_position = [text.position[1][0], text.position[1][1]]
+                ignores.append(text_position)
+                H265 = True
 
         # 1枚目・2枚目の間に分割の目印を入れる
-        mobile_voice_overlay.append("split")
+        ignores.append("split")
 
     # モバイルボイスオーバーレイ リスト分割
-    index = mobile_voice_overlay.index("split")
-    split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index + 1: -1]]
-    return [all_text, text_box, split_overlay, log]
+    index = ignores.index("split")
+    split_ignores = [ignores[:index], ignores[index + 1: -1]]
+    return [all_text, text_box, split_ignores, log]
 
 
 async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], text_box: list, error_msg: list[str], log: str):
@@ -220,17 +227,17 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
     return [circle_position, log]
 
 
-async def remove_overlay(circle_position: list, overlay_list: list, i: int, log: str):
+async def remove_ignore(circle_position: list, ignore: list, i: int, log: str):
     for setting_on in circle_position:
-        if bool(overlay_list):  # 中身ないときがある
-            log += f"MVO座標{i + 1}: " + str(overlay_list) + "\n"
+        if bool(ignore):  # 中身ないときがある
+            log += f"MVO座標{i + 1}: " + str(ignore) + "\n"
 
-            for overlay in overlay_list:
+            for ignore_place in ignore:
                 # オーバーレイと設定オンのy座標距離を計算
-                overlay_distance = abs(setting_on[1] - overlay[1])
-                log += "MVO y座標距離: " + str(overlay_distance) + "\n"
+                distance = abs(setting_on[1] - ignore_place[1])
+                log += "MVO y座標距離: " + str(distance) + "\n"
 
-                if overlay_distance < 100:  # 100未満ならモバイルボイスオーバーレイ設定オン 無視する
+                if distance < 100:  # 100未満ならモバイルボイスオーバーレイ設定オン 無視する
                     try:
                         circle_position.remove(setting_on)
                     except ValueError:
