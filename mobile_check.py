@@ -139,7 +139,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], split_text_boxes: list, error_msg: list[str], log: str):
     noise_suppression = []  # noise_suppressionは保存
     for i, (file_name, monochrome_file_name, text_box) in enumerate(zip(file_names, monochrome_file_names, split_text_boxes)):
-        Krisp, standard = [], []  # 毎回クリア
+        krisp, standard, no_setting = [], [], []  # 毎回クリア
         cv2_image = cv2.imread(file_name)
         cv2_image_monochrome = cv2.imread(monochrome_file_name, cv2.IMREAD_GRAYSCALE)
 
@@ -166,34 +166,52 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         for text in text_box:
             if "Krisp" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
-                Krisp = [int((text_position[0][0] + text_position[1][0]) / 2),
+                krisp = [int((text_position[0][0] + text_position[1][0]) / 2),
                          int((text_position[0][1] + text_position[1][1]) / 2)]
             if "スタンダード" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
                 standard = [int((text_position[0][0] + text_position[1][0]) / 2),
                             int((text_position[0][1] + text_position[1][1]) / 2)]
+            if "設定しない" in text.content.replace(' ', ''):
+                text_position = text.position  # (top_left(x, y), bottom_right(x, y))
+                no_setting = [int((text_position[0][0] + text_position[1][0]) / 2),
+                              int((text_position[0][1] + text_position[1][1]) / 2)]
 
-        if bool(Krisp) and bool(standard):  # 「Krisp」「スタンダード」があるとき
-            log += f"「スタンダード」座標{i + 1}: {str(standard)}" + "\n"
-            log += f"「Krisp」座標{i + 1}: {str(Krisp)}" + "\n"
+        coordinate = [krisp, standard, no_setting]
+        log += f"ノイズ抑制座標{i + 1}: {str(coordinate)}" + "\n"
 
-            # 「Krisp」「スタンダード」の、y座標の距離 = チェックマークと「スタンダード」の距離でもある
-            distance_Krisp_standard = abs(Krisp[1] - standard[1])
-            log += f"ノイズ抑制 文字列距離{i + 1}: {distance_Krisp_standard}" + "\n"
+        distance_list = []
+        for c in coordinate:
+            if bool(c):
+                distance_list.append(center_check_mark[1] - c[1])
+            else:
+                distance_list.append(-1)
+        log += f"MT距離{i + 1}: {str(distance_list)}" + "\n"
 
-            # スタンダードとチェックマークのy座標距離
-            distance_y = center_check_mark[1] - standard[1]
-            log += f"MT距離{i + 1}: {distance_y}" + "\n"
+        condition = [distance_list[0] > 140, distance_list[1] > 70, 0 <= distance_list[2] < 60]
 
-            if distance_y < 50:  # このifに引っかかる = ノイキャン設定不適切
-                # チェックマークに斜線
-                cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
+        if any(condition) is False:  # このifに引っかかる = ノイキャン設定不適切
+            # チェックマークに斜線
+            cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
 
-                # 正しい場所 xはチェックマーク、yはスタンダードのy + Krispとスタンダードの距離
+            if bool(krisp) and bool(standard):
+                distance_Krisp_standard = krisp[1] - standard[1]
+            else:
+                distance_Krisp_standard = 100
+
+            # 正しい場所
+            if bool(no_setting):
+                correct_place = [center_check_mark[0], standard[1]]
+                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
+            elif bool(standard):
                 correct_place = [center_check_mark[0], distance_Krisp_standard + standard[1]]
                 cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
-                cv2.imwrite(file_name, cv2_image)
-                error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
+            elif bool(krisp):
+                correct_place = [center_check_mark[0], distance_Krisp_standard * 2 + standard[1]]
+                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
+
+            cv2.imwrite(file_name, cv2_image)
+            error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
 
     if bool(noise_suppression) is False:  # 中身が空なら失敗
         error_msg.append('* ノイズ抑制設定のチェックマーク検出に失敗しました。')
