@@ -29,5 +29,8 @@ COPY template_white.png template_white.png
 COPY makesomenoise-4243a19364b1.json makesomenoise-4243a19364b1.json
 COPY eng.traineddata eng.traineddata
 COPY jpn.traineddata jpn.traineddata
+
+RUN tesseract -v
+
 CMD ["python", "-u", "discordbot_image.py"]
 ARG EnvironmentVariable
