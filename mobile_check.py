@@ -103,33 +103,34 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
         text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
         text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
 
+        # 1枚目・2枚目の間に分割の目印を入れる
+        text_box.append("split")
+
+    # リスト分割
+    index = text_box.index("split")
+    split_text_boxes = [text_box[:index], text_box[index + 1: -1]]
+
+    # 各画像ごとに内容を分析
+    for txt_box in split_text_boxes:
         overlay = False
         H265 = False
-        for text in text_box:
-            if "モバイルボイスオーバーレイ" in text.content.replace(' ', '') and overlay is False:
+        for txt in txt_box:
+            all_text += txt.content.replace(' ', '')
+            if "モバイルボイスオーバーレイ" in txt.content.replace(' ', '') and overlay is False:
                 # モバイルボイスオーバーレイの右下を記録
-                text_position = [text.position[1][0], text.position[1][1]]
+                text_position = [txt.position[1][0], txt.position[1][1]]
                 ignores.append(text_position)
                 overlay = True
-            if "H265" in text.content.replace(' ', '') and H265 is False:
+            if "H265" in txt.content.replace(' ', '') and H265 is False:
                 # H265の右下を記録
-                text_position = [text.position[1][0], text.position[1][1]]
+                text_position = [txt.position[1][0], txt.position[1][1]]
                 ignores.append(text_position)
                 H265 = True
 
         # 1枚目・2枚目の間に分割の目印を入れる
         ignores.append("split")
-        text_box.append("split")
 
-    for text in text_box:
-        if text == "split":
-            continue
-        all_text += text.content.replace(' ', '')
-
-    index = text_box.index("split")
-    split_text_boxes = [text_box[:index], text_box[index + 1: -1]]
-
-    # モバイルボイスオーバーレイ リスト分割
+    # リスト分割
     index = ignores.index("split")
     split_ignores = [ignores[:index], ignores[index + 1: -1]]
     return [all_text, split_text_boxes, split_ignores, log]
