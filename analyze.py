@@ -78,7 +78,7 @@ async def analyze(message: discord.Message):
         await progress.edit(embed=embed_progress)
 
         # モバイルボイスオーバーレイ の座標検出
-        all_text, text_box, split_overlay, log = await mobile_check.text_check(file_names, log)
+        all_text, text_box, ignores, log = await mobile_check.text_check(file_names, log)
 
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
@@ -100,7 +100,7 @@ async def analyze(message: discord.Message):
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
-        for i, (overlay_list, file_name) in enumerate(zip(split_overlay, file_names)):
+        for i, (ignore, file_name) in enumerate(zip(ignores, file_names)):
             # 設定オン座標検出
             circle_position, log = await mobile_check.setting_off_check(file_name, log)
 
@@ -108,7 +108,7 @@ async def analyze(message: discord.Message):
             await progress.edit(embed=embed_progress)
 
             # モバイルボイスオーバーレイ引き算
-            circle_position, log = await mobile_check.remove_overlay(circle_position, overlay_list, i, log)
+            circle_position, log = await mobile_check.remove_ignore(circle_position, ignore, i, log)
 
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
