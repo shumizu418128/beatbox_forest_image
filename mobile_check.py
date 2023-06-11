@@ -156,7 +156,9 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         log += f"MT座標{i + 1}: {str(center_check_mark)}" + "\n"
 
         # 「スタンダード」の位置チェック
+        print("--------------------------------")
         for text in text_box:
+            print(text.content.replace(' ', ''))
             if "スタンダード" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
                 standard = [int((text_position[0][0] + text_position[1][0]) / 2),
