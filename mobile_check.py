@@ -96,7 +96,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
     ignores = []
     text_box = []
 
-    # モバイルボイスオーバーレイのチェック
+    # 文字書き出し
     for monochrome_file_name in monochrome_file_names:
         PIL_image_monochrome = Image.open(monochrome_file_name)
 
@@ -139,7 +139,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], split_text_boxes: list, error_msg: list[str], log: str):
     noise_suppression = []  # noise_suppressionは保存
     for i, (file_name, monochrome_file_name, text_box) in enumerate(zip(file_names, monochrome_file_names, split_text_boxes)):
-        standard = []  # 毎回クリア
+        Krisp, standard = [], []  # 毎回クリア
         cv2_image = cv2.imread(file_name)
         cv2_image_monochrome = cv2.imread(monochrome_file_name, cv2.IMREAD_GRAYSCALE)
 
@@ -183,6 +183,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
 
             # スタンダードとチェックマークのy座標距離
             distance_y = center_check_mark[1] - standard[1]
+            log += f"MT距離{i + 1}: {distance_y}" + "\n"
 
             if distance_y < 50:  # このifに引っかかる = ノイキャン設定不適切
                 # チェックマークに斜線
