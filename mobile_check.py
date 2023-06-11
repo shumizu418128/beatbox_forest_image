@@ -125,7 +125,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], text_box: list, error_msg: list[str], log: str):
     noise_suppression = []  # noise_suppressionは保存
     for i, (file_name, monochrome_file_name) in enumerate(zip(file_names, monochrome_file_names)):
-        Krisp, standard = [], []  # 毎回クリア
+        standard = []  # 毎回クリア
         cv2_image = cv2.imread(file_name)
         cv2_image_monochrome = cv2.imread(monochrome_file_name, cv2.IMREAD_GRAYSCALE)
 
