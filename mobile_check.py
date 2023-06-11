@@ -145,6 +145,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         bottom_right = [top_left[0] + 60, top_left[1] + 60]
         center_check_mark = [top_left[0] + 30, top_left[1] + 30]
         noise_suppression.append(center_check_mark)
+        log += f"MT座標{i + 1}: {str(center_check_mark)}" + "\n"
 
         # 「設定しない」の位置チェック
         for text in text_box:
@@ -152,6 +153,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
                 center_text = [int((text_position[0][0] + text_position[1][0]) / 2),
                                int((text_position[0][1] + text_position[1][1]) / 2)]
+                log += f"「設定しない」座標{i + 1}: {str(center_text)}" + "\n"
 
         if bool(center_text):  # 「設定しない」があるとき
             # チェックマーク &「設定しない」の、y座標の距離
