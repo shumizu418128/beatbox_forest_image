@@ -19,7 +19,7 @@ RUN apt-get update \
 
 COPY requirements.txt requirements.txt
 
-RUN pip install requirements.txt
+RUN pip install -r requirements.txt
 
 COPY discordbot_image.py discordbot_image.py
 COPY mobile_check.py mobile_check.py
