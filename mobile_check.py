@@ -104,6 +104,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 
         for text in text_box:
             all_text += text.content.replace(' ', '')
+            print(text.content.replace(' ', ''))
 
         for text in text_box:
             if "モバイルボイスオーバーレイ" in text.content.replace(' ', ''):
@@ -114,8 +115,6 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 
         # 1枚目・2枚目の間に分割の目印を入れる
         mobile_voice_overlay.append("split")
-
-    print(all_text)
 
     # モバイルボイスオーバーレイ リスト分割
     index = mobile_voice_overlay.index("split")
@@ -149,24 +148,15 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         noise_suppression.append(center_check_mark)
         log += f"MT座標{i + 1}: {str(center_check_mark)}" + "\n"
 
-        # 「Krisp」「スタンダード」の位置チェック
+        # 「スタンダード」の位置チェック
         for text in text_box:
-            if "Krisp" in text.content.replace(' ', ''):
-                text_position = text.position  # (top_left(x, y), bottom_right(x, y))
-                Krisp = [int((text_position[0][0] + text_position[1][0]) / 2),
-                         int((text_position[0][1] + text_position[1][1]) / 2)]
             if "スタンダード" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
                 standard = [int((text_position[0][0] + text_position[1][0]) / 2),
                             int((text_position[0][1] + text_position[1][1]) / 2)]
 
-        if bool(Krisp) and bool(standard):  # 「Krisp」「スタンダード」があるとき
+        if bool(standard):  # 「Krisp」「スタンダード」があるとき
             log += f"「スタンダード」座標{i + 1}: {str(standard)}" + "\n"
-            log += f"「Krisp」座標{i + 1}: {str(Krisp)}" + "\n"
-
-            # 「Krisp」「スタンダード」の、y座標の距離 = チェックマークと「スタンダード」の距離でもある
-            distance_Krisp_standard = abs(Krisp[1] - standard[1])
-            log += f"ノイズ抑制 文字列距離{i + 1}: {distance_Krisp_standard}" + "\n"
 
             # スタンダードとチェックマークのy座標距離
             distance_y = center_check_mark[1] - standard[1]
@@ -176,7 +166,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                 cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
 
                 # 正しい場所 xはチェックマーク、yはスタンダードのy + Krispとスタンダードの距離
-                correct_place = [center_check_mark[0], distance_Krisp_standard + standard[1]]
+                correct_place = [center_check_mark[0], 90 + standard[1]]
                 cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
                 cv2.imwrite(file_name, cv2_image)
                 error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
