@@ -78,7 +78,7 @@ async def analyze(message: discord.Message):
         await progress.edit(embed=embed_progress)
 
         # モバイルボイスオーバーレイ の座標検出
-        all_text, text_box, ignores, log = await mobile_check.text_check(file_names, log)
+        all_text, split_text_boxes, split_ignores, log = await mobile_check.text_check(file_names, log)
 
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
@@ -89,7 +89,7 @@ async def analyze(message: discord.Message):
             return
 
         # ノイズ抑制チェックマーク座標
-        error_msg, log = await mobile_check.noise_suppression_check(file_names, monochrome_file_names, text_box, error_msg, log)
+        error_msg, log = await mobile_check.noise_suppression_check(file_names, monochrome_file_names, split_text_boxes, error_msg, log)
 
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
@@ -100,7 +100,7 @@ async def analyze(message: discord.Message):
         embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
-        for i, (ignore, file_name) in enumerate(zip(ignores, file_names)):
+        for i, (ignores, file_name) in enumerate(zip(split_ignores, file_names)):
             # 設定オン座標検出
             circle_position, log = await mobile_check.setting_off_check(file_name, log)
 
@@ -108,7 +108,7 @@ async def analyze(message: discord.Message):
             await progress.edit(embed=embed_progress)
 
             # モバイルボイスオーバーレイ引き算
-            circle_position, log = await mobile_check.remove_ignore(circle_position, ignore, i, log)
+            circle_position, log = await mobile_check.remove_ignore(circle_position, ignores, i, log)
 
             embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
