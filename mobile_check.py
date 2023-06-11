@@ -94,17 +94,14 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
     lang = "jpn"
     all_text = ""
     ignores = []
+    text_box = []
 
     # モバイルボイスオーバーレイのチェック
     for monochrome_file_name in monochrome_file_names:
         PIL_image_monochrome = Image.open(monochrome_file_name)
 
-        text_box = tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
+        text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
         text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
-
-        for text in text_box:
-            all_text += text.content.replace(' ', '')
-            print(text.content.replace(' ', ''))
 
         overlay = False
         H265 = False
@@ -122,16 +119,25 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 
         # 1枚目・2枚目の間に分割の目印を入れる
         ignores.append("split")
+        text_box.append("split")
+
+    for text in text_box:
+        if text == "split":
+            continue
+        all_text += text.content.replace(' ', '')
+
+    index = text_box.index("split")
+    split_text_boxes = [text_box[:index], text_box[index + 1: -1]]
 
     # モバイルボイスオーバーレイ リスト分割
     index = ignores.index("split")
     split_ignores = [ignores[:index], ignores[index + 1: -1]]
-    return [all_text, text_box, split_ignores, log]
+    return [all_text, split_text_boxes, split_ignores, log]
 
 
-async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], text_box: list, error_msg: list[str], log: str):
+async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], split_text_boxes: list, error_msg: list[str], log: str):
     noise_suppression = []  # noise_suppressionは保存
-    for i, (file_name, monochrome_file_name) in enumerate(zip(file_names, monochrome_file_names)):
+    for i, (file_name, monochrome_file_name, text_box) in enumerate(zip(file_names, monochrome_file_names, split_text_boxes)):
         standard = []  # 毎回クリア
         cv2_image = cv2.imread(file_name)
         cv2_image_monochrome = cv2.imread(monochrome_file_name, cv2.IMREAD_GRAYSCALE)
@@ -155,17 +161,24 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         noise_suppression.append(center_check_mark)
         log += f"MT座標{i + 1}: {str(center_check_mark)}" + "\n"
 
-        # 「スタンダード」の位置チェック
-        print("--------------------------------")
+        # 「Krisp」「スタンダード」の位置チェック
         for text in text_box:
-            print(text.content.replace(' ', ''))
+            if "Krisp" in text.content.replace(' ', ''):
+                text_position = text.position  # (top_left(x, y), bottom_right(x, y))
+                Krisp = [int((text_position[0][0] + text_position[1][0]) / 2),
+                         int((text_position[0][1] + text_position[1][1]) / 2)]
             if "スタンダード" in text.content.replace(' ', ''):
                 text_position = text.position  # (top_left(x, y), bottom_right(x, y))
                 standard = [int((text_position[0][0] + text_position[1][0]) / 2),
                             int((text_position[0][1] + text_position[1][1]) / 2)]
 
-        if bool(standard):  # 「Krisp」「スタンダード」があるとき
+        if bool(Krisp) and bool(standard):  # 「Krisp」「スタンダード」があるとき
             log += f"「スタンダード」座標{i + 1}: {str(standard)}" + "\n"
+            log += f"「Krisp」座標{i + 1}: {str(Krisp)}" + "\n"
+
+            # 「Krisp」「スタンダード」の、y座標の距離 = チェックマークと「スタンダード」の距離でもある
+            distance_Krisp_standard = abs(Krisp[1] - standard[1])
+            log += f"ノイズ抑制 文字列距離{i + 1}: {distance_Krisp_standard}" + "\n"
 
             # スタンダードとチェックマークのy座標距離
             distance_y = center_check_mark[1] - standard[1]
@@ -175,7 +188,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                 cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
 
                 # 正しい場所 xはチェックマーク、yはスタンダードのy + Krispとスタンダードの距離
-                correct_place = [center_check_mark[0], 90 + standard[1]]
+                correct_place = [center_check_mark[0], distance_Krisp_standard + standard[1]]
                 cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
                 cv2.imwrite(file_name, cv2_image)
                 error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
@@ -229,14 +242,14 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
     return [circle_position, log]
 
 
-async def remove_ignore(circle_position: list, ignore: list, i: int, log: str):
+async def remove_ignore(circle_position: list, ignores: list, i: int, log: str):
     for setting_on in circle_position:
-        if bool(ignore):  # 中身ないときがある
-            log += f"MVO座標{i + 1}: " + str(ignore) + "\n"
+        if bool(ignores):  # 中身ないときがある
+            log += f"MVO座標{i + 1}: " + str(ignores) + "\n"
 
-            for ignore_place in ignore:
+            for ignore in ignores:
                 # オーバーレイと設定オンのy座標距離を計算
-                distance = abs(setting_on[1] - ignore_place[1])
+                distance = abs(setting_on[1] - ignore[1])
                 log += "MVO y座標距離: " + str(distance) + "\n"
 
                 if distance < 100:  # 100未満ならモバイルボイスオーバーレイ設定オン 無視する
