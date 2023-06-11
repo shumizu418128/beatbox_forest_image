@@ -115,6 +115,8 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
         # 1枚目・2枚目の間に分割の目印を入れる
         mobile_voice_overlay.append("split")
 
+    print(all_text)
+
     # モバイルボイスオーバーレイ リスト分割
     index = mobile_voice_overlay.index("split")
     split_overlay = [mobile_voice_overlay[:index], mobile_voice_overlay[index + 1: -1]]
