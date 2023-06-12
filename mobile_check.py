@@ -190,15 +190,15 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         coordinate_bool = [c for c in coordinate if bool(c)]  # これが空だと判定不可
 
         if any(condition) is False and bool(coordinate_bool):  # このifに引っかかる = ノイキャン設定不適切
+            # チェックマークに斜線
+            cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
+
             # 文字列間距離
             distance_krisp_standard = 100
             if len(coordinate_bool) >= 2:
                 distance_krisp_standard = coordinate_bool[1][1] - coordinate_bool[0][1]
                 if bool(standard) is False:
                     distance_krisp_standard /= 2
-
-            # チェックマークに斜線
-            cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
 
             # 正しい場所
             if bool(no_setting):
