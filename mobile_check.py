@@ -189,27 +189,29 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         log += f"MT距離{i + 1}: {str(distance_list)}" + "\n"
 
         condition = [distance_list[0] > 140, distance_list[1] > 70, 0 <= distance_list[2] < 60]
+        coordinate_bool = [c for c in coordinate if bool(c)]  # これが空だと判定不可
 
-        if any(condition) is False:  # このifに引っかかる = ノイキャン設定不適切
+        if any(condition) is False and bool(coordinate_bool):  # このifに引っかかる = ノイキャン設定不適切
+            # 文字列間距離
+            distance_krisp_standard = 100
+            if len(coordinate_bool) >= 2:
+                distance_krisp_standard = coordinate_bool[1][1] - coordinate_bool[0][1]
+                if bool(standard) is False:
+                    distance_krisp_standard /= 2
+
             # チェックマークに斜線
             cv2.line(cv2_image, top_left, bottom_right, (0, 0, 255), 3)
 
-            if bool(krisp) and bool(standard):
-                distance_Krisp_standard = krisp[1] - standard[1]
-            else:
-                distance_Krisp_standard = 100
-
             # 正しい場所
             if bool(no_setting):
-                correct_place = [center_check_mark[0], standard[1]]
-                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
+                y = no_setting[1]
             elif bool(standard):
-                correct_place = [center_check_mark[0], distance_Krisp_standard + standard[1]]
-                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
+                y = distance_krisp_standard + standard[1]
             elif bool(krisp):
-                correct_place = [center_check_mark[0], distance_Krisp_standard * 2 + standard[1]]
-                cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
+                y = distance_krisp_standard * 2 + krisp[1]
 
+            correct_place = [center_check_mark[0], y]
+            cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
             cv2.imwrite(file_name, cv2_image)
             error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
 
