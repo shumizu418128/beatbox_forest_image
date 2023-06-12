@@ -164,16 +164,14 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
 
         # 「Krisp」「スタンダード」の位置チェック
         for text in text_box:
+            text_position = text.position  # (top_left(x, y), bottom_right(x, y))
             if "Krisp" in text.content.replace(' ', ''):
-                text_position = text.position  # (top_left(x, y), bottom_right(x, y))
                 krisp = [int((text_position[0][0] + text_position[1][0]) / 2),
                          int((text_position[0][1] + text_position[1][1]) / 2)]
             if "スタンダード" in text.content.replace(' ', ''):
-                text_position = text.position  # (top_left(x, y), bottom_right(x, y))
                 standard = [int((text_position[0][0] + text_position[1][0]) / 2),
                             int((text_position[0][1] + text_position[1][1]) / 2)]
             if "設定しない" in text.content.replace(' ', ''):
-                text_position = text.position  # (top_left(x, y), bottom_right(x, y))
                 no_setting = [int((text_position[0][0] + text_position[1][0]) / 2),
                               int((text_position[0][1] + text_position[1][1]) / 2)]
 
