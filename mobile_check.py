@@ -265,12 +265,12 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
 async def remove_ignore(circle_position: list, ignores: list, i: int, log: str):
     for setting_on in circle_position:
         if bool(ignores):  # 中身ないときがある
-            log += f"MVO座標{i + 1}: " + str(ignores) + "\n"
+            log += f"除外ワード座標{i + 1}: " + str(ignores) + "\n"
 
             for ignore in ignores:
                 # オーバーレイと設定オンのy座標距離を計算
                 distance = abs(setting_on[1] - ignore[1])
-                log += "MVO y座標距離: " + str(distance) + "\n"
+                log += "除外ワード y座標距離: " + str(distance) + "\n"
 
                 if distance < 100:  # 100未満ならモバイルボイスオーバーレイ設定オン 無視する
                     try:
