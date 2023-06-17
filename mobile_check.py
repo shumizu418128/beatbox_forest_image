@@ -102,6 +102,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 
         text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
         text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
+        text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=3))
 
         # 1枚目・2枚目の間に分割の目印を入れる
         text_box.append("split")
