@@ -79,7 +79,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
                 # 感度設定に関してはここで書き出しを行う
                 cv2.circle(image, (75, closest_xy[1]), 65, (0, 0, 255), 20)  # x = 75にして常に最高感度を要求
                 cv2.imwrite(file_name, image)
-                log += "感度座標: " + str(closest_xy) + "\n"
+                log += f"感度座標: `{str(closest_xy)}`" + "\n"
     if sensitive_exist is False:
         error_msg.append("* 感度設定が映るようにしてください。一部端末では「マイクのテスト」ボタンを押すと表示されます。")
     if sensitive_high is False:
@@ -161,7 +161,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         bottom_right = [top_left[0] + 60, top_left[1] + 60]
         center_check_mark = [top_left[0] + 30, top_left[1] + 30]
         noise_suppression.append(center_check_mark)
-        log += f"MT座標{i + 1}: {str(center_check_mark)}" + "\n"
+        log += f"MT座標{i + 1}: `{str(center_check_mark)}`" + "\n"
 
         # 「Krisp」「スタンダード」の位置チェック
         for text in text_box:
@@ -177,17 +177,17 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                               int((text_position[0][1] + text_position[1][1]) / 2)]
 
         coordinate = [krisp, standard, no_setting]
-        log += f"ノイズ抑制座標{i + 1}: {str(coordinate)}" + "\n"
+        log += f"ノイズ抑制座標{i + 1}: `{str(coordinate)}`" + "\n"
 
         distance_list = []
         for c in coordinate:
             if bool(c):
                 distance_list.append(center_check_mark[1] - c[1])
             else:
-                distance_list.append(-1)
+                distance_list.append(-10)
         log += f"MT距離{i + 1}: {str(distance_list)}" + "\n"
 
-        condition = [distance_list[0] > 140, distance_list[1] > 70, 0 <= distance_list[2] < 60]
+        condition = [distance_list[0] > 140, distance_list[1] > 70, -10 < distance_list[2] < 60]
         coordinate_bool = [c for c in coordinate if bool(c)]  # これが空だと判定不可
 
         if any(condition) is False and bool(coordinate_bool):  # このifに引っかかる = ノイキャン設定不適切
@@ -259,19 +259,19 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
             if x < width * 2 / 3:  # 左側にあるやつは無視
                 continue
             circle_position.append([x, y])
-    log += "設定オン座標: " + str(circle_position) + "\n"
+    log += f"設定オン座標: `{str(circle_position)}`" + "\n"
     return [circle_position, log]
 
 
 async def remove_ignore(circle_position: list, ignores: list, i: int, log: str):
     for setting_on in circle_position:
         if bool(ignores):  # 中身ないときがある
-            log += f"除外ワード座標{i + 1}: " + str(ignores) + "\n"
+            log += f"除外ワード座標{i + 1}: `{str(ignores)}`" + "\n"
 
             for ignore in ignores:
                 # オーバーレイと設定オンのy座標距離を計算
                 distance = abs(setting_on[1] - ignore[1])
-                log += "除外ワード y座標距離: " + str(distance) + "\n"
+                log += f"除外ワード y座標距離: `{str(distance)}`" + "\n"
 
                 if distance < 100:  # 100未満ならモバイルボイスオーバーレイ設定オン 無視する
                     try:
