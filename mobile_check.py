@@ -185,7 +185,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                 distance_list.append(center_check_mark[1] - c[1])
             else:
                 distance_list.append(-10)
-        log += f"MT距離{i + 1}: {str(distance_list)}" + "\n"
+        log += f"MT距離{i + 1}: `{str(distance_list)}`" + "\n"
 
         condition = [distance_list[0] > 140, distance_list[1] > 70, -10 < distance_list[2] < 60]
         coordinate_bool = [c for c in coordinate if bool(c)]  # これが空だと判定不可
