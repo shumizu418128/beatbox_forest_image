@@ -120,7 +120,7 @@ async def analyze(message: discord.Message):
             await progress.edit(embed=embed_progress)
 
     # ログ表示
-    embed = Embed(title="分析ログ", description=log)
+    embed = Embed(title="Debug log", description=log)
     await progress.edit(embed=embed)
 
     # 結果通知
