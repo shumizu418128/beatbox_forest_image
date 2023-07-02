@@ -177,7 +177,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                               int((text_position[0][1] + text_position[1][1]) / 2)]
 
         coordinate = [krisp, standard, no_setting]
-        log += f"ノイズ抑制座標{i + 1}: `{str(coordinate)}`" + "\n"
+        log += "ノイズ抑制座標" + str(i + 1) + ": `" + ', '.join(coordinate) + "`" + "\n"
 
         distance_list = []
         for c in coordinate:
@@ -259,19 +259,19 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
             if x < width * 2 / 3:  # 左側にあるやつは無視
                 continue
             circle_position.append([x, y])
-    log += f"設定オン座標: `{str(circle_position)}`" + "\n"
+    log += "設定オン座標: `" + ", ".join(circle_position) + "`" + "\n"
     return [circle_position, log]
 
 
 async def remove_ignore(circle_position: list, ignores: list, i: int, log: str):
     for setting_on in circle_position:
         if bool(ignores):  # 中身ないときがある
-            log += f"除外ワード座標{i + 1}: `{str(ignores)}`" + "\n"
+            log += "除外ワード座標" + str(i + 1) + ": `" + ", ".join(ignores) + "`" + "\n"
 
             for ignore in ignores:
                 # オーバーレイと設定オンのy座標距離を計算
                 distance = abs(setting_on[1] - ignore[1])
-                log += f"除外ワード y座標距離: `{str(distance)}`" + "\n"
+                log += f"除外ワード y座標距離: {str(distance)}" + "\n"
 
                 if distance < 100:  # 100未満ならモバイルボイスオーバーレイ設定オン 無視する
                     try:
