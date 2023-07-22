@@ -177,7 +177,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                               int((text_position[0][1] + text_position[1][1]) / 2)]
 
         coordinate = [krisp, standard, no_setting]
-        log += "ノイズ抑制座標" + str(i + 1) + ": `" + ', '.join(coordinate) + "`" + "\n"
+        log += "ノイズ抑制座標" + str(i + 1) + ": `" + str(coordinate) + "`" + "\n"
 
         distance_list = []
         for c in coordinate:
