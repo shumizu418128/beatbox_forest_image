@@ -23,6 +23,7 @@ RUN pip install -r requirements.txt
 
 COPY discordbot_image.py discordbot_image.py
 COPY mobile_check.py mobile_check.py
+COPY keep_alive.py keep_alive.py
 COPY analyze.py analyze.py
 COPY template_black.png template_black.png
 COPY template_white.png template_white.png
