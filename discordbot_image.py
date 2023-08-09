@@ -2,7 +2,9 @@ import os
 
 import discord
 from discord import ChannelType, Client, Interaction, Message
+
 from analyze import analyze
+from keep_alive import keep_alive
 
 TOKEN = os.environ['DISCORD_BOT_TOKEN']
 intents = discord.Intents.all()  # デフォルトのIntentsオブジェクトを生成
@@ -51,4 +53,5 @@ async def on_interaction(interaction: Interaction):
         await bot_channel.send(f"{tari3210.mention}\nエラー報告\n\n{interaction.channel.jump_url}")
         await interaction.followup.send(f"{interaction.user.mention}\n運営メンバーに通知を送信しました。まもなく対応します。\nご用件をこのチャンネルにご記入ください。")
 
+keep_alive()
 client.run(TOKEN)
