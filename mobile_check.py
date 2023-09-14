@@ -266,7 +266,7 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
 async def remove_ignore(circle_position: list, ignores: list, i: int, log: str):
     for setting_on in circle_position:
         if bool(ignores):  # 中身ないときがある
-            log += "除外ワード座標" + str(i + 1) + ": `" + ", ".join(ignores) + "`" + "\n"
+            log += "除外ワード座標" + str(i + 1) + ": `" + str(ignores) + "`" + "\n"
 
             for ignore in ignores:
                 # オーバーレイと設定オンのy座標距離を計算
