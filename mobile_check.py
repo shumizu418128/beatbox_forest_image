@@ -89,7 +89,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
 
 async def text_check(monochrome_file_names: list[str], log: str):  # 各種設定項目チェック
     # 初期設定
-    tools = pyocr.get_available_tools()
+    tools = pyocr.get_available_tools()[0]
     tool = tools[0]
     lang = "jpn"
     all_text = ""
@@ -259,7 +259,7 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
             if x < width * 2 / 3:  # 左側にあるやつは無視
                 continue
             circle_position.append([x, y])
-    log += "設定オン座標: `" + ", ".join(circle_position) + "`" + "\n"
+    log += "設定オン座標: `" + str(circle_position) + "`" + "\n"
     return [circle_position, log]
 
 
