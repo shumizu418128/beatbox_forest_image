@@ -89,7 +89,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
 
 async def text_check(monochrome_file_names: list[str], log: str):  # 各種設定項目チェック
     # 初期設定
-    tools = pyocr.get_available_tools()[0]
+    tools = pyocr.get_available_tools()
     tool = tools[0]
     lang = "jpn"
     all_text = ""
