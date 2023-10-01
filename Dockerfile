@@ -1,8 +1,6 @@
 # ベースイメージとしてPython 3.11を使用
 FROM python:3.11
 
-# 不要なUSER指定を削除
-# USER root
 
 # 環境変数を一度に設定
 ENV LANG=ja_JP.UTF-8 \
