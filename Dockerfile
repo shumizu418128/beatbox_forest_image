@@ -21,7 +21,7 @@ COPY requirements.txt requirements.txt
 
 RUN pip install -r requirements.txt
 
-COPY discordbot_image.py discordbot_image.py
+COPY main.py main.py
 COPY mobile_check.py mobile_check.py
 COPY keep_alive.py keep_alive.py
 COPY analyze.py analyze.py
