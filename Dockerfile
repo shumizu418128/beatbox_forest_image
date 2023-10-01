@@ -33,5 +33,5 @@ COPY jpn.traineddata jpn.traineddata
 
 RUN tesseract -v
 
-CMD ["python", "-u", "discordbot_image.py"]
+CMD ["python", "-u", "main.py"]
 ARG EnvironmentVariable
