@@ -21,8 +21,12 @@ RUN apt-get update \
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-# コードとトレーニングデータをコピー
-COPY main.py mobile_check.py keep_alive.py analyze.py template_black.png template_white.png makesomenoise-4243a19364b1.json eng.traineddata jpn.traineddata /app/
+# ファイルをコピー
+COPY main.py /app/
+COPY *.py /app/
+COPY *.png /app/
+COPY *.json /app/
+COPY *.traineddata /app/
 
 # tesseractのバージョン情報を表示
 RUN tesseract -v
