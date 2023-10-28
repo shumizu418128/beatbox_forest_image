@@ -235,7 +235,7 @@ async def word_contain_check(all_text: str, error_msg: list[str]):  # 必要事�
             error_msg.append(f"検知失敗: 設定「{word}」")
             word_missing = True
     if word_missing:
-        error_msg.append("* 上記の検知失敗した設定が映るようにしてください。")
+        error_msg.append("* 上記の検知失敗した設定が映るようにしてください。なお、特殊なフォントを使用している場合、うまく読み取れない場合があります。")
     return error_msg
 
 
