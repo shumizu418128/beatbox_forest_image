@@ -29,7 +29,8 @@ async def on_message(message: Message):
     else:
         channel_id = message.channel.id
 
-    if len(message.attachments) != 2 and channel_id in [1115986804026392627, 897784178958008322]:  # マイクチェックチャンネル bot用チャット
+    # マイクチェックチャンネル bot用チャット
+    if len(message.attachments) != 2 and channel_id in [1115986804026392627, 897784178958008322]:
         if message.author.id == 412082841829113877:  # tari3210
             return
         await message.delete(delay=1)
@@ -38,7 +39,8 @@ async def on_message(message: Message):
             await message.channel.send("ほとんどの端末では、画像1枚では、すべての設定項目が画像内に収まりません。\n画像1枚ですべての設定項目が画像内に収まる場合、同じ画像を2枚提出してください。", delete_after=20)
         return
 
-    if len(message.attachments) == 2 and channel_id in [1115986804026392627, 897784178958008322]:  # マイクチェックチャンネル bot用チャット
+    # マイクチェックチャンネル bot用チャット
+    if len(message.attachments) == 2 and channel_id in [1115986804026392627, 897784178958008322]:
         await analyze(message)
 
 
@@ -48,7 +50,8 @@ async def on_interaction(interaction: Interaction):
     custom_id = interaction.data["custom_id"]
 
     if custom_id == "button_support":
-        bot_channel = interaction.guild.get_channel(897784178958008322)  # bot用チャット
+        bot_channel = interaction.guild.get_channel(
+            897784178958008322)  # bot用チャット
         tari3210 = interaction.guild.get_member(412082841829113877)
         await bot_channel.send(f"{tari3210.mention}\nエラー報告\n\n{interaction.channel.jump_url}")
         await interaction.followup.send(f"{interaction.user.mention}\n運営メンバーに通知を送信しました。まもなく対応します。\nご用件をこのチャンネルにご記入ください。")
