@@ -10,23 +10,27 @@ from scipy.spatial import distance
 
 async def edit_image(file_names: list[str]):
     # 初期設定
-    monochrome_file_names = [file_name[:5] + "monochrome" + file_name[5:] for file_name in file_names]
+    monochrome_file_names = [
+        file_name[:5] + "monochrome" + file_name[5:] for file_name in file_names]
 
     for file_name, monochrome_file_name in zip(file_names, monochrome_file_names):
         # 上10%カット
         image = cv2.imread(file_name)
         height, width = image.shape[:2]  # height -> Y座標  width -> X座標
-        image_crop = image[int(height / 10): height, 0: width]  # y, x    ここで上10%カット
+        image_crop = image[int(height / 10): height,
+                           0: width]  # y, x    ここで上10%カット
         cv2.imwrite(file_name, image_crop)
 
         # モノクロ画像を作る
         image_gray = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
-        _, image_monochrome = cv2.threshold(image_gray, 0, 255, cv2.THRESH_OTSU)
+        _, image_monochrome = cv2.threshold(
+            image_gray, 0, 255, cv2.THRESH_OTSU)
         cv2.imwrite(monochrome_file_name, image_monochrome)
     return monochrome_file_names
 
 
-async def sensitive_check(file_names: list[str], error_msg: list[str], log: str):  # 感度設定
+# 感度設定
+async def sensitive_check(file_names: list[str], error_msg: list[str], log: str):
     # 初期設定
     sensitive_exist = False
     sensitive_high = True
@@ -51,22 +55,27 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
         yellow_pixels = cv2.countNonZero(frame_mask)
 
         color_pixel = str(green_pixels + yellow_pixels)  # みどり + きいろ
-        fraction_pixel = Decimal(color_pixel) / Decimal(all_pixel) * Decimal("100")  # みどり + きいろ の比率(パーセント)
+        # みどり + きいろ の比率(パーセント)
+        fraction_pixel = Decimal(color_pixel) / \
+            Decimal(all_pixel) * Decimal("100")
         log += f"感度ピクセル比率{i + 1}: " + "{:.2f}%".format(fraction_pixel) + "\n"
 
         if Decimal(fraction_pixel) > Decimal("1.4"):  # 感度設定のピクセルが全体の1.2%以上ある = ノイズを検知している
-            error_msg.append("* 感度設定を判定できませんでした。感度設定のバーの大部分が緑色になっていることをご確認ください。")
+            error_msg.append(
+                "* 感度設定を判定できませんでした。感度設定のバーの大部分が緑色になっていることをご確認ください。")
 
         elif Decimal(fraction_pixel) > Decimal("0.5"):  # 0.5以上で感度あり
             sensitive_exist = True
             if green_pixels < yellow_pixels * 3:  # 感度が低すぎる
                 sensitive_high = False
-                contours, _ = cv2.findContours(frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
+                contours, _ = cv2.findContours(
+                    frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
                 xy_sensitive = []
                 for c in contours:
                     result = cv2.moments(c)
                     try:
-                        x, y = int(result["m10"] / result["m00"] * 2 / 3), int(result["m01"] / result["m00"])
+                        x, y = int(result["m10"] / result["m00"] *
+                                   2 / 3), int(result["m01"] / result["m00"])
                     except ZeroDivisionError:
                         continue
                     xy_sensitive.append([x, y])
@@ -77,7 +86,8 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
                         closest = color_distance
                         closest_xy = xy
                 # 感度設定に関してはここで書き出しを行う
-                cv2.circle(image, (75, closest_xy[1]), 65, (0, 0, 255), 20)  # x = 75にして常に最高感度を要求
+                # x = 75にして常に最高感度を要求
+                cv2.circle(image, (75, closest_xy[1]), 65, (0, 0, 255), 20)
                 cv2.imwrite(file_name, image)
                 log += f"感度座標: `{str(closest_xy)}`" + "\n"
     if sensitive_exist is False:
@@ -100,9 +110,12 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
     for monochrome_file_name in monochrome_file_names:
         PIL_image_monochrome = Image.open(monochrome_file_name)
 
-        text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
-        text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
-        text_box += tool.image_to_string(PIL_image_monochrome, lang, pyocr.builders.LineBoxBuilder(tesseract_layout=3))
+        text_box += tool.image_to_string(PIL_image_monochrome,
+                                         lang, pyocr.builders.LineBoxBuilder(tesseract_layout=12))
+        text_box += tool.image_to_string(PIL_image_monochrome,
+                                         lang, pyocr.builders.LineBoxBuilder(tesseract_layout=6))
+        text_box += tool.image_to_string(PIL_image_monochrome,
+                                         lang, pyocr.builders.LineBoxBuilder(tesseract_layout=3))
 
         # 1枚目・2枚目の間に分割の目印を入れる
         text_box.append("split")
@@ -142,7 +155,8 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
     for i, (file_name, monochrome_file_name, text_box) in enumerate(zip(file_names, monochrome_file_names, split_text_boxes)):
         krisp, standard, no_setting = [], [], []  # 毎回クリア
         cv2_image = cv2.imread(file_name)
-        cv2_image_monochrome = cv2.imread(monochrome_file_name, cv2.IMREAD_GRAYSCALE)
+        cv2_image_monochrome = cv2.imread(
+            monochrome_file_name, cv2.IMREAD_GRAYSCALE)
 
         # 白黒判定
         white_pixel = cv2.countNonZero(cv2_image_monochrome)
@@ -165,7 +179,8 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
 
         # 「Krisp」「スタンダード」の位置チェック
         for text in text_box:
-            text_position = text.position  # (top_left(x, y), bottom_right(x, y))
+            # (top_left(x, y), bottom_right(x, y))
+            text_position = text.position
             if "Krisp" in text.content.replace(' ', ''):
                 krisp = [int((text_position[0][0] + text_position[1][0]) / 2),
                          int((text_position[0][1] + text_position[1][1]) / 2)]
@@ -187,7 +202,8 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                 distance_list.append(-10)
         log += f"MT距離{i + 1}: `{str(distance_list)}`" + "\n"
 
-        condition = [distance_list[0] > 140, distance_list[1] > 70, -10 < distance_list[2] < 60]
+        condition = [distance_list[0] > 140, distance_list[1]
+                     > 70, -10 < distance_list[2] < 60]
         coordinate_bool = [c for c in coordinate if bool(c)]  # これが空だと判定不可
 
         if any(condition) is False and bool(coordinate_bool):  # このifに引っかかる = ノイキャン設定不適切
@@ -197,7 +213,8 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
             # 文字列間距離
             distance_krisp_standard = 100
             if len(coordinate_bool) >= 2:
-                distance_krisp_standard = coordinate_bool[1][1] - coordinate_bool[0][1]
+                distance_krisp_standard = coordinate_bool[1][1] - \
+                    coordinate_bool[0][1]
                 if bool(standard) is False:
                     distance_krisp_standard /= 2
 
@@ -212,14 +229,16 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
             correct_place = [center_check_mark[0], y]
             cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
             cv2.imwrite(file_name, cv2_image)
-            error_msg.append('* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
+            error_msg.append(
+                '* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
 
     if bool(noise_suppression) is False:  # 中身が空なら失敗
         error_msg.append('* ノイズ抑制設定のチェックマーク検出に失敗しました。')
     return [error_msg, log]
 
 
-async def word_contain_check(all_text: str, error_msg: list[str]):  # 必要事項があるかチェック
+# 必要事項があるかチェック
+async def word_contain_check(all_text: str, error_msg: list[str]):
     # 初期設定
     word_missing = False
 
@@ -235,7 +254,8 @@ async def word_contain_check(all_text: str, error_msg: list[str]):  # 必要事�
             error_msg.append(f"検知失敗: 設定「{word}」")
             word_missing = True
     if word_missing:
-        error_msg.append("* 上記の検知失敗した設定が映るようにしてください。なお、特殊なフォントを使用している場合、うまく読み取れない場合があります。")
+        error_msg.append(
+            "* 上記の検知失敗した設定が映るようにしてください。なお、特殊なフォントを使用している場合、うまく読み取れない場合があります。")
     return error_msg
 
 
@@ -249,12 +269,14 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
     lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
     upper = np.array([123, 172, 252])
     frame_mask = cv2.inRange(hsv, lower, upper)
-    contours, _ = cv2.findContours(frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
+    contours, _ = cv2.findContours(
+        frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
     for c in contours:
         area = cv2.contourArea(c, False)
         if area > 200:  # 面積200以上で設定オンとみなす
             result = cv2.moments(c)
-            x, y = int(result["m10"] / result["m00"]), int(result["m01"] / result["m00"])
+            x, y = int(result["m10"] / result["m00"]
+                       ), int(result["m01"] / result["m00"])
             _, width = cv2_image.shape[:2]
             if x < width * 2 / 3:  # 左側にあるやつは無視
                 continue
@@ -281,7 +303,8 @@ async def remove_ignore(circle_position: list, ignores: list, i: int, log: str):
     return [circle_position, log]
 
 
-async def write_circle(file_name: str, position_list: list, error_msg: list[str]):  # 赤丸書き込み
+# 赤丸書き込み
+async def write_circle(file_name: str, position_list: list, error_msg: list[str]):
     # 初期設定
     cv2_image = cv2.imread(file_name)
 
