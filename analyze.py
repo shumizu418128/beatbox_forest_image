@@ -45,7 +45,8 @@ async def analyze(message: discord.Message):
         await sleep(1)
 
     # 報告ボタン
-    button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red, custom_id="button_support")
+    button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red,
+                    custom_id="button_support")
     view = View()
     view.add_item(button)
     await channel.send("このbotはベータ版です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
@@ -62,25 +63,29 @@ async def analyze(message: discord.Message):
         error_msg = []
         log = ""
         emoji = random.choice(message.guild.emojis)
-        embed_progress = Embed(title="分析中...", description=f"{emoji}▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️☑️")
+        embed_progress = Embed(
+            title="分析中...", description=f"{emoji}▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️▫️☑️")
         progress = await channel.send(embed=embed_progress)
 
         # モノクロ画像を作る・上10%カット
         monochrome_file_names = await mobile_check.edit_image(file_names)
 
-        embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+        embed_progress.description = "🟦" + \
+            embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         # 感度設定
         error_msg, log = await mobile_check.sensitive_check(file_names, error_msg, log)
 
-        embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+        embed_progress.description = "🟦" + \
+            embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         # モバイルボイスオーバーレイ の座標検出
         all_text, split_text_boxes, split_ignores, log = await mobile_check.text_check(file_names, log)
 
-        embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+        embed_progress.description = "🟦" + \
+            embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         # 外国語検出（ひらがな・カタカナが無い場合ストップ）
@@ -91,32 +96,37 @@ async def analyze(message: discord.Message):
         # ノイズ抑制チェックマーク座標
         error_msg, log = await mobile_check.noise_suppression_check(file_names, monochrome_file_names, split_text_boxes, error_msg, log)
 
-        embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+        embed_progress.description = "🟦" + \
+            embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         # 必要な設定項目があるか
         error_msg = await mobile_check.word_contain_check(all_text, error_msg)
 
-        embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+        embed_progress.description = "🟦" + \
+            embed_progress.description.replace("▫️", "", 1)
         await progress.edit(embed=embed_progress)
 
         for i, (ignores, file_name) in enumerate(zip(split_ignores, file_names)):
             # 設定オン座標検出
             circle_position, log = await mobile_check.setting_off_check(file_name, log)
 
-            embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+            embed_progress.description = "🟦" + \
+                embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
             # モバイルボイスオーバーレイ引き算
             circle_position, log = await mobile_check.remove_ignore(circle_position, ignores, i, log)
 
-            embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+            embed_progress.description = "🟦" + \
+                embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
             # 赤丸書き出し
             error_msg = await mobile_check.write_circle(file_name, circle_position, error_msg)
 
-            embed_progress.description = "🟦" + embed_progress.description.replace("▫️", "", 1)
+            embed_progress.description = "🟦" + \
+                embed_progress.description.replace("▫️", "", 1)
             await progress.edit(embed=embed_progress)
 
     # ログ表示
@@ -126,7 +136,8 @@ async def analyze(message: discord.Message):
     # 結果通知
     tari3210 = message.guild.get_member(412082841829113877)
     embed = Embed(title="分析結果", description=":ok:\n問題なし", color=0x00ff00)
-    embed.set_footer(text=f"bot開発者: {str(tari3210)}", icon_url=tari3210.avatar.url)
+    embed.set_footer(
+        text=f"bot開発者: {str(tari3210)}", icon_url=tari3210.avatar.url)
     JST = timezone(timedelta(hours=9))
     embed.timestamp = datetime.now(JST)
     if len(error_msg) > 0:
