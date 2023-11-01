@@ -60,7 +60,7 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
             Decimal(all_pixel) * Decimal("100")
         log += f"感度ピクセル比率{i + 1}: " + "{:.2f}%".format(fraction_pixel) + "\n"
 
-        if Decimal(fraction_pixel) > Decimal("1.4"):  # 感度設定のピクセルが全体の1.2%以上ある = ノイズを検知している
+        if Decimal(fraction_pixel) > Decimal("1.4"):  # みどり＋きいろのピクセルが全体の1.4%以上ある = 感度設定以外の色を検出している
             error_msg.append(
                 "* 感度設定を判定できませんでした。感度設定のバーの大部分が緑色になっていることをご確認ください。")
 
@@ -91,9 +91,9 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
                 cv2.imwrite(file_name, image)
                 log += f"感度座標: `{str(closest_xy)}`" + "\n"
     if sensitive_exist is False:
-        error_msg.append("* 感度設定が映るようにしてください。一部端末では「マイクのテスト」ボタンを押すと表示されます。")
+        error_msg.append("* 感度設定が映るようにしてください。一部端末では「マイクのテスト」ボタンを押すと表示されます。")  # 感度設定検出失敗
     if sensitive_high is False:
-        error_msg.append("* 設定感度が低すぎます。赤丸のところまで感度を上げてください。")
+        error_msg.append("* 設定感度が低すぎます。赤丸のところまで感度を上げてください。")  # 感度が低すぎる
     return [error_msg, log]
 
 
@@ -125,10 +125,10 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
     split_text_boxes = [text_box[:index], text_box[index + 1: -1]]
 
     # 各画像ごとに内容を分析
-    for txt_box in split_text_boxes:
+    for txt_box in split_text_boxes:  # 画像1枚ずつ読み込み
         overlay = False
         H265 = False
-        for txt in txt_box:
+        for txt in txt_box:  # 1行ずつ読み込み
             all_text += txt.content.replace(' ', '')
             if "モバイルボイスオーバーレイ" in txt.content.replace(' ', '') and overlay is False:
                 # モバイルボイスオーバーレイの右下を記録
@@ -152,7 +152,7 @@ async def text_check(monochrome_file_names: list[str], log: str):  # 各種設�
 
 async def noise_suppression_check(file_names: list[str], monochrome_file_names: list[str], split_text_boxes: list, error_msg: list[str], log: str):
     noise_suppression = []  # noise_suppressionは保存
-    for i, (file_name, monochrome_file_name, text_box) in enumerate(zip(file_names, monochrome_file_names, split_text_boxes)):
+    for i, (file_name, monochrome_file_name, text_box) in enumerate(zip(file_names, monochrome_file_names, split_text_boxes)):  # 画像1枚ずつ読み込み
         krisp, standard, no_setting = [], [], []  # 毎回クリア
         cv2_image = cv2.imread(file_name)  # 画像読み込み
         cv2_image_monochrome = cv2.imread(
@@ -161,7 +161,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         # 白黒判定
         white_pixel = cv2.countNonZero(cv2_image_monochrome)  # 白ピクセル数
         black_pixel = cv2_image_monochrome.size - white_pixel  # 画像の総ピクセル数 - 白ピクセル数
-        if white_pixel > black_pixel:
+        if white_pixel > black_pixel:  # 白黒判定
             template = cv2.imread("template_white.png")  # 白背景
         else:
             template = cv2.imread("template_black.png")  # 黒背景
@@ -174,7 +174,7 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
             continue
         bottom_right = [top_left[0] + 60, top_left[1] + 60]  # チェックマークの右下
         center_check_mark = [top_left[0] + 30, top_left[1] + 30]  # チェックマークの中心
-        noise_suppression.append(center_check_mark)
+        noise_suppression.append(center_check_mark)  # チェックマークの中心を保存
         log += f"MT座標{i + 1}: `{str(center_check_mark)}`" + "\n"
 
         # 「Krisp」「スタンダード」の位置チェック
@@ -223,18 +223,18 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
                 distance_krisp_standard = coordinate_bool[1][1] - \
                     coordinate_bool[0][1]
                 if bool(standard) is False:
-                    distance_krisp_standard /= 2
+                    distance_krisp_standard /= 2  # スタンダードが無い場合は半分にする（krispと設定しないの間隔の半分）
 
             # 正しい場所
             if bool(no_setting):
-                y = no_setting[1]
+                y = no_setting[1]  # 設定しないの座標
             elif bool(standard):
-                y = distance_krisp_standard + standard[1]
+                y = distance_krisp_standard + standard[1]  # スタンダードの座標 + 算出した距離
             elif bool(krisp):
-                y = distance_krisp_standard * 2 + krisp[1]
+                y = distance_krisp_standard * 2 + krisp[1]  # Krispの座標 + 算出した距離x2
 
-            correct_place = [center_check_mark[0], y]
-            cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)
+            correct_place = [center_check_mark[0], y]  # チェックマークがあるべき座標
+            cv2.circle(cv2_image, correct_place, 45, (0, 0, 255), 2)  # 赤丸
             cv2.imwrite(file_name, cv2_image)
             error_msg.append(
                 '* ノイズ抑制設定に誤りがあります。赤丸（細い線）のところをタップして「設定しない」に変更してください。')
