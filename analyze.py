@@ -71,21 +71,21 @@ async def analyze(message: discord.Message):
         monochrome_file_names = await mobile_check.edit_image(file_names)
 
         embed_progress.description = "🟦" + \
-            embed_progress.description.replace("▫️", "", 1)
+            embed_progress.description.replace("▫️", "", 1)  # 進捗バー
         await progress.edit(embed=embed_progress)
 
         # 感度設定
         error_msg, log = await mobile_check.sensitive_check(file_names, error_msg, log)
 
         embed_progress.description = "🟦" + \
-            embed_progress.description.replace("▫️", "", 1)
+            embed_progress.description.replace("▫️", "", 1)  # 進捗バー
         await progress.edit(embed=embed_progress)
 
         # モバイルボイスオーバーレイ の座標検出
         all_text, split_text_boxes, split_ignores, log = await mobile_check.text_check(file_names, log)
 
         embed_progress.description = "🟦" + \
-            embed_progress.description.replace("▫️", "", 1)
+            embed_progress.description.replace("▫️", "", 1)  # 進捗バー
         await progress.edit(embed=embed_progress)
 
         # 外国語検出（ひらがな・カタカナが無い場合ストップ）
@@ -97,14 +97,14 @@ async def analyze(message: discord.Message):
         error_msg, log = await mobile_check.noise_suppression_check(file_names, monochrome_file_names, split_text_boxes, error_msg, log)
 
         embed_progress.description = "🟦" + \
-            embed_progress.description.replace("▫️", "", 1)
+            embed_progress.description.replace("▫️", "", 1)  # 進捗バー
         await progress.edit(embed=embed_progress)
 
         # 必要な設定項目があるか
         error_msg = await mobile_check.word_contain_check(all_text, error_msg)
 
         embed_progress.description = "🟦" + \
-            embed_progress.description.replace("▫️", "", 1)
+            embed_progress.description.replace("▫️", "", 1)  # 進捗バー
         await progress.edit(embed=embed_progress)
 
         for i, (ignores, file_name) in enumerate(zip(split_ignores, file_names)):
@@ -143,9 +143,9 @@ async def analyze(message: discord.Message):
     if len(error_msg) > 0:  # エラーがある場合
         embed.color = 0xff0000
         embed.description = ":x: \n以下の問題が見つかりました。\n\n-------------"
-        value = '\n'.join(error_msg)
+        value = '\n'.join(error_msg)  # エラー内容
         embed.add_field(name="エラー内容", value=value, inline=False)
-    await channel.send(message.author.mention, embed=embed, files=[File(file_name) for file_name in file_names])
+    await channel.send(message.author.mention, embed=embed, files=[File(file_name) for file_name in file_names])  # 結果送信
 
     # 報告ボタン
     await channel.send("このbotはベータ版です。\nご不明な点があれば、お気軽に問い合わせボタンをご利用ください。", view=view)
