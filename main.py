@@ -25,15 +25,15 @@ async def on_message(message: Message):
     if message.channel.type == ChannelType.private_thread:  # 非公開スレッド
         if len(message.attachments) == 0:
             return
-        channel_id = message.channel.parent_id
+        channel_id = message.channel.parent_id  # スレッドなら親チャンネルのID
     else:
-        channel_id = message.channel.id
+        channel_id = message.channel.id  # スレッドじゃないならチャンネルのID
 
     # マイクチェックチャンネル bot用チャット
     if len(message.attachments) != 2 and channel_id in [1115986804026392627, 897784178958008322]:
         if message.author.id == 412082841829113877:  # tari3210
             return
-        await message.delete(delay=1)
+        await message.delete(delay=1)  # 2枚ではないので削除
         await message.channel.send(f"{message.author.mention}\nError: 画像を2枚同時に投稿してください。", delete_after=20)
         if len(message.attachments) == 1:
             await message.channel.send("ほとんどの端末では、画像1枚では、すべての設定項目が画像内に収まりません。\n画像1枚ですべての設定項目が画像内に収まる場合、同じ画像を2枚提出してください。", delete_after=20)
