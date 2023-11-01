@@ -22,7 +22,7 @@ async def on_message(message: Message):
         await message.channel.send(f"{str(client.user)}\n{discord.__version__}")
         return
 
-    if message.channel.type == ChannelType.private_thread:
+    if message.channel.type == ChannelType.private_thread:  # 非公開スレッド
         if len(message.attachments) == 0:
             return
         channel_id = message.channel.parent_id
