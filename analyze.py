@@ -34,15 +34,15 @@ async def analyze(message: discord.Message):
 
     # 画像保存
     for attachment in message.attachments:
-        if attachment.content_type not in ["image/jpeg", "image/png"]:
+        if attachment.content_type not in ["image/jpeg", "image/png"]:  # png, jpg, jpeg画像じゃない場合
             await channel.send(f"{message.author.mention}\nError: \n画像を認識できませんでした。\nJPG, JPEG, PNG画像を提出してください。")
             return
         dt_now = datetime.now()
-        name = f"/tmp/{message.author.id}." + dt_now.strftime("%H.%M.%S.png")
+        name = f"/tmp/{message.author.id}." + dt_now.strftime("%H.%M.%S.png")  # 画像名(時刻依存にして名前の重複を防ぐ)
         file_names.append(name)
         await attachment.save(name)
         await channel.send(name.replace('/tmp/', ''), file=discord.File(name))
-        await sleep(1)
+        await sleep(1)  # 画像名の重複を防ぐために1秒待つ
 
     # 報告ボタン
     button = Button(label="サポートへ問い合わせる", style=ButtonStyle.red,
