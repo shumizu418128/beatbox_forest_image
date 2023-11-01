@@ -112,21 +112,21 @@ async def analyze(message: discord.Message):
             circle_position, log = await mobile_check.setting_off_check(file_name, log)
 
             embed_progress.description = "🟦" + \
-                embed_progress.description.replace("▫️", "", 1)
+                embed_progress.description.replace("▫️", "", 1)  # 進捗バー
             await progress.edit(embed=embed_progress)
 
             # モバイルボイスオーバーレイ引き算
             circle_position, log = await mobile_check.remove_ignore(circle_position, ignores, i, log)
 
             embed_progress.description = "🟦" + \
-                embed_progress.description.replace("▫️", "", 1)
+                embed_progress.description.replace("▫️", "", 1)  # 進捗バー
             await progress.edit(embed=embed_progress)
 
             # 赤丸書き出し
             error_msg = await mobile_check.write_circle(file_name, circle_position, error_msg)
 
             embed_progress.description = "🟦" + \
-                embed_progress.description.replace("▫️", "", 1)
+                embed_progress.description.replace("▫️", "", 1)  # 進捗バー
             await progress.edit(embed=embed_progress)
 
     # ログ表示
@@ -140,7 +140,7 @@ async def analyze(message: discord.Message):
         text=f"bot開発者: {str(tari3210)}", icon_url=tari3210.avatar.url)
     JST = timezone(timedelta(hours=9))
     embed.timestamp = datetime.now(JST)
-    if len(error_msg) > 0:
+    if len(error_msg) > 0:  # エラーがある場合
         embed.color = 0xff0000
         embed.description = ":x: \n以下の問題が見つかりました。\n\n-------------"
         value = '\n'.join(error_msg)
