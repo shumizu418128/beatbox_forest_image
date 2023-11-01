@@ -47,12 +47,12 @@ async def sensitive_check(file_names: list[str], error_msg: list[str], log: str)
         lower = np.array([63, 0, 0])  # しきい値 みどり
         upper = np.array([76, 255, 255])
         frame_mask = cv2.inRange(hsv, lower, upper)  # 色検出しきい値範囲内の色を抽出するマスクを作成
-        green_pixels = cv2.countNonZero(frame_mask)
+        green_pixels = cv2.countNonZero(frame_mask)  # みどりのピクセル数
 
         lower = np.array([14, 0, 0])  # しきい値 きいろ
         upper = np.array([24, 255, 255])
         frame_mask = cv2.inRange(hsv, lower, upper)  # 色検出しきい値範囲内の色を抽出するマスクを作成
-        yellow_pixels = cv2.countNonZero(frame_mask)
+        yellow_pixels = cv2.countNonZero(frame_mask)  # きいろのピクセル数
 
         color_pixel = str(green_pixels + yellow_pixels)  # みどり + きいろ
         # みどり + きいろ の比率(パーセント)
@@ -154,17 +154,17 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
     noise_suppression = []  # noise_suppressionは保存
     for i, (file_name, monochrome_file_name, text_box) in enumerate(zip(file_names, monochrome_file_names, split_text_boxes)):
         krisp, standard, no_setting = [], [], []  # 毎回クリア
-        cv2_image = cv2.imread(file_name)
+        cv2_image = cv2.imread(file_name)  # 画像読み込み
         cv2_image_monochrome = cv2.imread(
-            monochrome_file_name, cv2.IMREAD_GRAYSCALE)
+            monochrome_file_name, cv2.IMREAD_GRAYSCALE)  # モノクロ画像読み込み
 
         # 白黒判定
-        white_pixel = cv2.countNonZero(cv2_image_monochrome)
-        black_pixel = cv2_image_monochrome.size - white_pixel
+        white_pixel = cv2.countNonZero(cv2_image_monochrome)  # 白ピクセル数
+        black_pixel = cv2_image_monochrome.size - white_pixel  # 画像の総ピクセル数 - 白ピクセル数
         if white_pixel > black_pixel:
-            template = cv2.imread("template_white.png")
+            template = cv2.imread("template_white.png")  # 白背景
         else:
-            template = cv2.imread("template_black.png")
+            template = cv2.imread("template_black.png")  # 黒背景
 
         # テンプレートマッチング
         result = cv2.matchTemplate(cv2_image, template, cv2.TM_CCOEFF_NORMED)
@@ -172,8 +172,8 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         log += f"MT精度{i + 1}: " + "{:.2%}".format(precision) + "\n"
         if precision < 0.7:  # 精度7割未満は検知失敗
             continue
-        bottom_right = [top_left[0] + 60, top_left[1] + 60]
-        center_check_mark = [top_left[0] + 30, top_left[1] + 30]
+        bottom_right = [top_left[0] + 60, top_left[1] + 60]  # チェックマークの右下
+        center_check_mark = [top_left[0] + 30, top_left[1] + 30]  # チェックマークの中心
         noise_suppression.append(center_check_mark)
         log += f"MT座標{i + 1}: `{str(center_check_mark)}`" + "\n"
 
@@ -181,29 +181,36 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         for text in text_box:
             # (top_left(x, y), bottom_right(x, y))
             text_position = text.position
-            if "Krisp" in text.content.replace(' ', ''):
+            if "Krisp" in text.content.replace(' ', ''):  # Krispの右下を記録
                 krisp = [int((text_position[0][0] + text_position[1][0]) / 2),
                          int((text_position[0][1] + text_position[1][1]) / 2)]
-            if "スタンダード" in text.content.replace(' ', ''):
+            if "スタンダード" in text.content.replace(' ', ''):  # スタンダードの右下を記録
                 standard = [int((text_position[0][0] + text_position[1][0]) / 2),
                             int((text_position[0][1] + text_position[1][1]) / 2)]
-            if "設定しない" in text.content.replace(' ', ''):
+            if "設定しない" in text.content.replace(' ', ''):  # 設定しないの右下を記録
                 no_setting = [int((text_position[0][0] + text_position[1][0]) / 2),
                               int((text_position[0][1] + text_position[1][1]) / 2)]
 
-        coordinate = [krisp, standard, no_setting]
+        coordinate = [krisp, standard, no_setting]  # これが空だと判定不可
         log += "ノイズ抑制座標" + str(i + 1) + ": `" + str(coordinate) + "`" + "\n"
 
         distance_list = []
         for c in coordinate:
-            if bool(c):
+            if bool(c):  # 中身が空じゃないなら距離を計算
                 distance_list.append(center_check_mark[1] - c[1])
-            else:
+            else:  # 中身が空なら-10
                 distance_list.append(-10)
         log += f"MT距離{i + 1}: `{str(distance_list)}`" + "\n"
 
+        """
+        チェックマークの座標判定：1行70として計算（実際は80~100程度）
+        1行目：140以上
+        2行目：70以上
+        3行目：-10～60（実際は5未満）
+        """
         condition = [distance_list[0] > 140, distance_list[1]
-                     > 70, -10 < distance_list[2] < 60]
+                     > 70, -10 < distance_list[2] < 60]  # チェックマーク座標の位置確認
+
         coordinate_bool = [c for c in coordinate if bool(c)]  # これが空だと判定不可
 
         if any(condition) is False and bool(coordinate_bool):  # このifに引っかかる = ノイキャン設定不適切
@@ -249,7 +256,7 @@ async def word_contain_check(all_text: str, error_msg: list[str]):
     # 必要事項
     word_list = ["自動検出", "ノイズ抑制", "高度音声検出"]
     word_list2 = ["入力モード", "バックグラウンドノイズ", "入力感度自動調整"]
-    for word, word2 in zip(word_list, word_list2):
+    for word, word2 in zip(word_list, word_list2):  # それぞれのワードがあるかチェック
         if word not in all_text and word2 not in all_text:
             error_msg.append(f"検知失敗: 設定「{word}」")
             word_missing = True
@@ -268,7 +275,7 @@ async def setting_off_check(file_name: str, log: str):  # 設定オン座標検�
     hsv = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2HSV)  # BGR色空間からHSV色空間への変換
     lower = np.array([113, 92, 222])  # 色検出しきい値の設定 (青)
     upper = np.array([123, 172, 252])
-    frame_mask = cv2.inRange(hsv, lower, upper)
+    frame_mask = cv2.inRange(hsv, lower, upper)  # 色検出しきい値範囲内の色を抽出するマスクを作成
     contours, _ = cv2.findContours(
         frame_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 輪郭抽出
     for c in contours:
