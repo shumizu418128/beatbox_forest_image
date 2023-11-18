@@ -162,13 +162,26 @@ async def noise_suppression_check(file_names: list[str], monochrome_file_names: 
         white_pixel = cv2.countNonZero(cv2_image_monochrome)  # 白ピクセル数
         black_pixel = cv2_image_monochrome.size - white_pixel  # 画像の総ピクセル数 - 白ピクセル数
         if white_pixel > black_pixel:  # 白黒判定
-            template = cv2.imread("template_white.png")  # 白背景
+            template_1 = cv2.imread("template_white.png")  # 白背景
+            template_2 = cv2.imread("template_white_20231118.png")
         else:
-            template = cv2.imread("template_black.png")  # 黒背景
+            template_1 = cv2.imread("template_black.png")  # 黒背景
+            template_2 = cv2.imread("template_black_20231118.png")
 
         # テンプレートマッチング
-        result = cv2.matchTemplate(cv2_image, template, cv2.TM_CCOEFF_NORMED)
-        _, precision, _, top_left = cv2.minMaxLoc(result)  # precision = 精度
+        result_1 = cv2.matchTemplate(cv2_image, template_1, cv2.TM_CCOEFF_NORMED)
+        _, precision_1, _, top_left_1 = cv2.minMaxLoc(result_1)  # precision = 精度
+
+        result_2 = cv2.matchTemplate(cv2_image, template_2, cv2.TM_CCOEFF_NORMED)
+        _, precision_2, _, top_left_2 = cv2.minMaxLoc(result_2)  # precision = 精度
+
+        if precision_1 > precision_2:  # 精度が高い方を採用
+            precision = precision_1
+            top_left = top_left_1
+        else:
+            precision = precision_2
+            top_left = top_left_2
+
         log += f"MT精度{i + 1}: " + "{:.2%}".format(precision) + "\n"
         if precision < 0.7:  # 精度7割未満は検知失敗
             continue
