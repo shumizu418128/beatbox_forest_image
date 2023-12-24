@@ -31,6 +31,8 @@ async def on_message(message: Message):
 
     # マイクチェックチャンネル bot用チャット
     if len(message.attachments) != 2 and channel_id in [1115986804026392627, 897784178958008322]:
+        if len(message.attachments) == 0 and channel_id == 897784178958008322:  # bot用チャットで、画像がない場合さようなら
+            return
         if message.author.id == 412082841829113877:  # tari3210
             return
         await message.delete(delay=1)  # 2枚ではないので削除
